@@ -1,4 +1,4 @@
-﻿namespace PRGTrainer.TasksStorage
+﻿namespace PRGTrainer.Core.TasksStorage
 {
     using System.Collections.Generic;
     using Model;

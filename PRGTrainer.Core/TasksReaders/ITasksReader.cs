@@ -1,4 +1,4 @@
-﻿namespace PRGTrainer.TasksReaders
+﻿namespace PRGTrainer.Core.TasksReaders
 {
     using System.Collections.Generic;
     using Model;

@@ -1,14 +1,14 @@
-﻿namespace PRGTrainer.Model
+﻿namespace PRGTrainer.Core.Model
 {
     /// <summary>
-    /// Плоский класс, содержищий сведения о задаче.
+    /// Плоский класс, содержащий сведения о задаче.
     /// </summary>
     public class Task
     {
         /// <summary>
         /// Получает или задает вопрос.
         /// </summary>
-        public string Qustion { get; set; }
+        public string Question { get; set; }
 
         /// <summary>
         /// Получает или задает первый неправильный вариант ответа.
