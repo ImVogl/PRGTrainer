@@ -1,4 +1,4 @@
-﻿namespace PRGTrainer.TasksReaders
+﻿namespace PRGTrainer.Core.TasksReaders
 {
     using System;
     using System.Collections.Generic;
@@ -42,7 +42,7 @@
         {
             var pathToTasksFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TaskFile);
             var doc = XDocument.Load(pathToTasksFile);
-            var taskElements = doc.Elements(TaskNodeName);
+            var taskElements = doc.Descendants(TaskNodeName).ToList();
 
             return taskElements.Select(CreateTask);
         }
@@ -63,20 +63,20 @@
             if (node.Element(@"question") == null)
                 throw new XmlSchemaException(IncorrectXmlStructureMsg);
 
-            if (node.Element(@"correctAnswerId") == null)
-                throw new XmlSchemaException(IncorrectXmlStructureMsg);
+            var answers =  node.Elements(@"answer")
+                .Select(c => new Answer { Id = c.Attribute("id").Value, Value = c.Value })
+                .ToList();
 
-            var answers =  node.Elements(@"answer").Select(c => c.Value).ToList();
             if (answers.Count != OptionsCount)
                 throw new XmlSchemaException(IncorrectXmlStructureMsg);
 
             return new Task
             {
-                CorrectOption = "",
-                Explanation = @"",
-                FirstWrongOption = "",
-                SecondWrongOption = "",
-                Qustion = ""
+                CorrectOption = answers.Single(c => c.Id == node.Element(@"correctAnswerId").Value).Value,
+                Explanation = node.Element(@"explanation").Value,
+                FirstWrongOption = answers.First(c => c.Id != node.Element(@"correctAnswerId").Value).Value,
+                SecondWrongOption = answers.Last(c => c.Id != node.Element(@"correctAnswerId").Value).Value,
+                Question = node.Element(@"question").Value
             };
         }
     }

@@ -2,3 +2,5 @@
 /packages/*
 /PRGTrainer/obj/*
 /PRGTrainer.Core/obj/*
+/PRGTrainer.Core.Tests/obj/*
+bin

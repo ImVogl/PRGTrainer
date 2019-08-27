@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tasks>
+<tesks>
 	<task>
 		<question>Какая процедура называется "подсчет голосов"?</question>
 		<answer id = "1">Перекладывание бюллютеней с пересчетом голосов избирателей.</answer>
@@ -192,4 +192,4 @@
 		<correctAnswerId></correctAnswerId>
 		<explanation></explanation>
 	</task>
-</tasks>
+</tesks>

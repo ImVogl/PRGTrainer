@@ -1,4 +1,4 @@
-﻿namespace PRGTrainer.TelegramHandler
+﻿namespace PRGTrainer.Core.TelegramHandler
 {
     /// <summary>
     /// Обработчик взаимодействия с telegram.

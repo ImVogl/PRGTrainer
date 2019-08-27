@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PRGTrainer.Core", "PRGTrain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PRGTrainer", "PRGTrainer\PRGTrainer.csproj", "{C229379E-7A59-49A4-9DF9-B6B0DD0B9EEC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PRGTrainer.Core.Tests", "PRGTrainer.Core.Tests\PRGTrainer.Core.Tests.csproj", "{760059FD-92C9-4C3D-9DA0-44941C966D7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C229379E-7A59-49A4-9DF9-B6B0DD0B9EEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C229379E-7A59-49A4-9DF9-B6B0DD0B9EEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C229379E-7A59-49A4-9DF9-B6B0DD0B9EEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{760059FD-92C9-4C3D-9DA0-44941C966D7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{760059FD-92C9-4C3D-9DA0-44941C966D7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{760059FD-92C9-4C3D-9DA0-44941C966D7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{760059FD-92C9-4C3D-9DA0-44941C966D7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tasks>
+	<task>
+		<question>Question 1</question>
+		<answer id = "1">Incorrect 1.1.</answer>
+		<answer id = "2">Correct 1.</answer>
+		<answer id = "3">Incorrect 1.2.</answer>
+		<correctAnswerId>2</correctAnswerId>
+	</task>
+</tasks>
