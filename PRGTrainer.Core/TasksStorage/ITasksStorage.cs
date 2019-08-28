@@ -9,9 +9,11 @@
     public interface ITasksStorage
     {
         /// <summary>
-        /// Получает коллекцию задач.
+        /// Получение коллекции задач.
         /// </summary>
-        IEnumerable<Task> Tasks { get; }
+        /// <param name="num">Число задач, которые необходимо отдать.</param>
+        /// <returns>Коллекция задач.</returns>
+        IEnumerable<Task> GetTasks(int num);
 
         /// <summary>
         /// Заполнение хранилища задач.

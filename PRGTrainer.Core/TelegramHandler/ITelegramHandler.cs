@@ -5,6 +5,9 @@
     /// </summary>
     public interface ITelegramHandler
     {
-        //
+        /// <summary>
+        /// Инициализация сессии.
+        /// </summary>
+        void InitialiseSession();
     }
 }
