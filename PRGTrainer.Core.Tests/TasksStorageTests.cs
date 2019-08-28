@@ -19,10 +19,10 @@
         {
             var taskCollection = new List<Task>
             {
-                new Task { Question = @"Question 1", CorrectOption = @"Correct 1", FirstWrongOption = @"First 1", SecondWrongOption = @"Second 1", Explanation = @"Explanation 1" },
-                new Task { Question = @"Question 2", CorrectOption = @"Correct 2", FirstWrongOption = @"First 2", SecondWrongOption = @"Second 2", Explanation = @"Explanation 2" },
-                new Task { Question = @"Question 3", CorrectOption = @"Correct 3", FirstWrongOption = @"First 3", SecondWrongOption = @"Second 3", Explanation = @"Explanation 3" },
-                new Task { Question = @"Question 4", CorrectOption = @"Correct 4", FirstWrongOption = @"First 4", SecondWrongOption = @"Second 4", Explanation = @"Explanation 4" }
+                new Task { Question = @"Question 1" },
+                new Task { Question = @"Question 2" },
+                new Task { Question = @"Question 3" },
+                new Task { Question = @"Question 4" }
             };
 
             _taskReader.Setup(c => c.Read()).Returns(taskCollection);
