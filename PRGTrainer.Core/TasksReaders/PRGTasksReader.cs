@@ -31,7 +31,7 @@
         private const byte OptionsCount = 3;
 
         /// <summary>
-        /// Текст сообщения при неправельной структуре файла.
+        /// Текст сообщения при неправильной структуре файла.
         /// </summary>
         private const string IncorrectXmlStructureMsg = @"Неверная структура файла!";
 

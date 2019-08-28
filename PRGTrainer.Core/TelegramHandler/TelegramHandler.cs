@@ -14,7 +14,7 @@
     /// <summary>
     /// Обработчик взаимодействия с telegram.
     /// </summary>
-    public class TelegramHandler : ITelegramHandler, IDisposable
+    public class TelegramHandler : ITelegramHandler
     {
         #region Private fields
 
