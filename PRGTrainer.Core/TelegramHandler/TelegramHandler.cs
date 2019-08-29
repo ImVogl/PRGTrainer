@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using TasksStorage;
     using Telegram.Bot;
@@ -16,12 +17,36 @@
     /// </summary>
     public class TelegramHandler : ITelegramHandler
     {
-        #region Private fields
+        #region Private constants
 
         /// <summary>
         /// Команда начало работы бота.
         /// </summary>
         private const string Start = @"/start";
+
+        /// <summary>
+        /// Команда на перезапуск теста.
+        /// </summary>
+        private const string Restart = @"/restart";
+
+        /// <summary>
+        /// Команда для первого варианта ответа.
+        /// </summary>
+        private const string FirstOption = @"Первый вариант";
+
+        /// <summary>
+        /// Команда для второго варианта ответа.
+        /// </summary>
+        private const string SecondOption = @"Второй вариант";
+
+        /// <summary>
+        /// Команда для третьего варианта ответа.
+        /// </summary>
+        private const string ThirdOption = @"Третий вариант";
+
+        #endregion
+
+        #region Private fields
 
         /// <summary>
         /// Клиент telegram.
@@ -78,10 +103,11 @@
         /// <inheritdoc />
         public void InitialiseSession()
         {
+            _tasksStorage.FillStorage();
             _telegramBotClient.OnMessage += OnMessageEvent;
-            _telegramBotClient.OnCallbackQuery += OnCallbackQuery;
-
             _telegramBotClient.StartReceiving();
+
+            Thread.Sleep(Timeout.Infinite);
         }
 
         /// <inheritdoc />
@@ -103,45 +129,41 @@
             if (message == null || message.Type != MessageType.Text)
                 return;
 
-            switch (message.Text)
+            var text = message.Text;
+            if (text == Start)
             {
-                case Start:
-                {
-                    await StartAction(message.From.Id).ConfigureAwait(false);
-                    break;
-                }
-
-                default:
-                {
-                    await _telegramBotClient.SendTextMessageAsync(message.From.Id, "/start").ConfigureAwait(false);
-                    break;
-                }
+                await StartAction(message.From.Id).ConfigureAwait(false);
+                return;
             }
+
+            if (text == FirstOption || text == SecondOption || text == ThirdOption)
+            {
+                await AnswerProcessing(message.From.Id, text).ConfigureAwait(false);
+                return;
+            }
+
+            if (text == Restart)
+            {
+                var keyboard = new ReplyKeyboardMarkup(new[] { new KeyboardButton(Start) });
+                await _telegramBotClient.SendTextMessageAsync(message.From.Id, Start, replyMarkup: keyboard).ConfigureAwait(false);
+            }
+
         }
 
-        /// <summary>
-        /// Обработка события при нажатии на кнопку.
-        /// </summary>
-        /// <param name="sender">Отправитель.</param>
-        /// <param name="eventArgs">Аргументы нажатия на кнопки.</param>
-        /// <returns>Коллекция кнопок.</returns>
-        private async void OnCallbackQuery(object sender, CallbackQueryEventArgs eventArgs)
-        {
-            var id = eventArgs.CallbackQuery.From.Id;
-            if (_currentCorrectAnswer[id] == eventArgs.CallbackQuery.Data)
-            {
-                try
-                {
-                    await _telegramBotClient.AnswerCallbackQueryAsync(eventArgs.CallbackQuery.Id, @"Верно!")
-                        .ConfigureAwait(false);
 
-                    _correctAnswersCount[id]++;
-                }
-                catch
-                {
-                    //
-                }
-            }
+
+        /// <summary>
+        /// Обработка ответа пользователя.
+        /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
+        /// <param name="answerOption">Вариант ответа пользователя.</param>
+        /// <returns></returns>
+        private async Task AnswerProcessing(int id, string answerOption)
+        {
+            if (_currentCorrectAnswer[id] == answerOption)
+                _correctAnswersCount[id]++;
+            
+            await SendExplanation(id).ConfigureAwait(false);
 
             if (_currentTask[id] < _tasks[id].Count)
             {
@@ -152,6 +174,21 @@
             {
                 await SendResult(id).ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Отправление объяснения к вопросу.
+        /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
+        /// <returns>Экземпляр задачи.</returns>
+        private async Task SendExplanation(int id)
+        {
+            var num = _currentTask[id];
+            if (string.IsNullOrWhiteSpace(_tasks[id][num].Explanation))
+                return;
+
+            var message = string.Format(@"Объяснение: {0}{1}{0}", Environment.NewLine, _tasks[id][num].Explanation);
+            await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -177,55 +214,67 @@
         private async Task SendQuestion(int id)
         {
             var currentTaskNum = _currentTask[id];
-            var keyboard = new ReplyKeyboardMarkup(
-                CreateButtons(
-                    _tasks[id][currentTaskNum].CorrectOption,
-                    _tasks[id][currentTaskNum].FirstWrongOption,
-                    _tasks[id][currentTaskNum].SecondWrongOption));
+            var keyboard = new ReplyKeyboardMarkup(CreateButtons());
 
-            _currentCorrectAnswer[id] = _tasks[id][currentTaskNum].CorrectOption;
+            var taskString = BuildQuestionMessage(_tasks[id][currentTaskNum], out var correctOption);
+            _currentCorrectAnswer[id] = correctOption;
             await _telegramBotClient
-                .SendTextMessageAsync(id, _tasks[id][currentTaskNum].Question, replyMarkup: keyboard)
+                .SendTextMessageAsync(id, taskString, replyMarkup: keyboard)
                 .ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Создание коллекции вертикальнорасположенных кнопок.
+        /// Создание сообщения с вопросом.
         /// </summary>
-        /// <param name="correct">Корректный вариант ответа.</param>
-        /// <param name="firstIncorrect">Первый неправильный ответ.</param>
-        /// <param name="secondIncorrect">Второй неправильный ответ.</param>
-        /// <returns>Коллекция кнопок.</returns>
-        private KeyboardButton[][] CreateButtons(string correct, string firstIncorrect, string secondIncorrect)
+        /// <param name="task">Задача.</param>
+        /// <param name="correctOption">Вариант с правильным ответом.</param>
+        /// <returns>Строка с вопросом.</returns>
+        private string BuildQuestionMessage(Model.Task task, out string correctOption)
         {
             var correctAnswerPos = _random.Next(1, 4);
             switch (correctAnswerPos)
             {
                 case 1:
-                    return new[]
-                    {
-                        new[] { new KeyboardButton(correct) },
-                        new[] { new KeyboardButton(firstIncorrect) },
-                        new[] { new KeyboardButton(secondIncorrect) }
-                    };
+                {
+                    correctOption = FirstOption;
+                    return string.Format(@"{0}{1}{1}{2}:{1}{3}{1}{1}{4}:{1}{5}{1}{1}{6}:{1}{7}", task.Question,
+                        Environment.NewLine, FirstOption, task.CorrectOption, SecondOption, task.FirstWrongOption,
+                        ThirdOption, task.SecondWrongOption);
+                }
                 case 2:
-                    return new[]
-                    {
-                        new[] { new KeyboardButton(firstIncorrect) },
-                        new[] { new KeyboardButton(correct) },
-                        new[] { new KeyboardButton(secondIncorrect) }
-                    };
-                    
+                {
+                    correctOption = SecondOption;
+                    return string.Format(@"{0}{1}{1}{2}:{1}{3}{1}{1}{4}:{1}{5}{1}{1}{6}:{1}{7}", task.Question,
+                        Environment.NewLine, FirstOption, task.FirstWrongOption, SecondOption, task.CorrectOption,
+                        ThirdOption, task.SecondWrongOption);
+                    }
+
                 case 3:
-                    return new[]
-                    {
-                        new[] { new KeyboardButton(secondIncorrect) },
-                        new[] { new KeyboardButton(firstIncorrect) },
-                        new[] { new KeyboardButton(correct) }
-                    };
+                {
+                    correctOption = ThirdOption;
+                    return string.Format(@"{0}{1}{1}{2}:{1}{3}{1}{1}{4}:{1}{5}{1}{1}{6}:{1}{7}", task.Question,
+                            Environment.NewLine, FirstOption, task.FirstWrongOption, SecondOption, task.SecondWrongOption,
+                            ThirdOption, task.CorrectOption);
+                    }
                 default:
                     throw new ArgumentOutOfRangeException(@"Номер варианта ответа неверный.");
             }
+        }
+
+        /// <summary>
+        /// Создание коллекции вертикально расположенных кнопок.
+        /// </summary>
+        /// <returns>Коллекция кнопок.</returns>
+        private KeyboardButton[][] CreateButtons()
+        {
+            return new[]
+            {
+                new[] { new KeyboardButton(FirstOption) },
+                new[] { new KeyboardButton(SecondOption) },
+                new[] { new KeyboardButton(ThirdOption) }
+            };
+                
+            
         }
 
         /// <summary>
