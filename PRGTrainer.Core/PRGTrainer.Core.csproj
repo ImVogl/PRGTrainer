@@ -61,6 +61,8 @@
     <Compile Include="TasksStorage\ITasksStorage.cs" />
     <Compile Include="TasksStorage\TasksStorage.cs" />
     <Compile Include="TelegramHandler\ITelegramHandler.cs" />
+    <Compile Include="TelegramHandler\LawTest\ILawTest.cs" />
+    <Compile Include="TelegramHandler\LawTest\LawTest.cs" />
     <Compile Include="TelegramHandler\TelegramHandler.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +73,9 @@
     <Content Include="PRGTasks.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TelegramHandler\ReferenceBook\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
