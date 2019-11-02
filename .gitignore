@@ -4,3 +4,4 @@
 /PRGTrainer.Core/obj/*
 /PRGTrainer.Core.Tests/obj/*
 bin
+*.cache
