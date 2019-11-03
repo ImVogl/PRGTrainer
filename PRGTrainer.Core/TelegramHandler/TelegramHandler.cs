@@ -105,6 +105,7 @@
         {
             _tasksStorage.FillStorage();
             _telegramBotClient.OnMessage += OnMessageEvent;
+            _telegramBotClient.Timeout = new TimeSpan(0, 20, 0);
             _telegramBotClient.StartReceiving();
 
             Thread.Sleep(Timeout.Infinite);
