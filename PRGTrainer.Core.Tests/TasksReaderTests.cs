@@ -10,7 +10,7 @@
     public class TasksReaderTests
     {
         private static readonly string TestFolder = TestContext.CurrentContext.TestDirectory;
-        private readonly ITasksReader _tasksReader = new PRGTasksReader();
+        private readonly ITasksReader _tasksReader = new FileTasksReader();
 
         [Test, Description(@"Получение коллекции задач.")]
         public void GetTasks()

@@ -9,9 +9,9 @@
     using Model;
 
     /// <summary>
-    /// Ридер задач для членов комиссии с правом решающего голоса.
+    /// Ридер задач из файла.
     /// </summary>
-    public class PRGTasksReader : ITasksReader
+    public class FileTasksReader : ITasksReader
     {
         #region Private fields
         

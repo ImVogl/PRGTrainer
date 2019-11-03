@@ -9,7 +9,7 @@
     {
         static void Main(string[] args)
         {
-            var taskStorage = new TasksStorage(new PRGTasksReader());
+            var taskStorage = new TasksStorage(new FileTasksReader());
 
             HostFactory.Run(
                 host =>
