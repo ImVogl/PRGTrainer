@@ -7,7 +7,7 @@
 		<answer id = "3">Incorrect 1.2.</answer>
 		<correctAnswerId>2</correctAnswerId>
 		<explanation>Explanation 1.</explanation>
-	  <memberTypes>Conclusive</memberTypes>
+	  <memberTypes>Conclusive, Observer, Consultative</memberTypes>
 	</task>
 	<task>
 		<question>Question 2</question>
