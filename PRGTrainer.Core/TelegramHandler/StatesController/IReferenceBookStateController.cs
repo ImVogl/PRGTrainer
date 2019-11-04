@@ -5,7 +5,7 @@
     /// <summary>
     /// Интерфейс контроллера состояний для справочника.
     /// </summary>
-    public interface IReferenceBookStateController : IMessageProcessing
+    public interface IReferenceBookStateController : IStateController
     {
         /// <summary>
         /// Проверяет, использует ли текущий пользователь справочные материалы.

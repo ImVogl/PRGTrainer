@@ -5,8 +5,13 @@
     /// <summary>
     /// Интерфейс контроллера состояний для тестов.
     /// </summary>
-    public interface ITestStateController : IMessageProcessing
+    public interface ITestStateController : IStateController
     {
+        /// <summary>
+        /// Получает текст сообщения, обозначающее начало нового теста.
+        /// </summary>
+        string NewTestCommand { get; }
+
         /// <summary>
         /// Проверяет, проходит ли текущий пользователь тестирование.
         /// </summary>

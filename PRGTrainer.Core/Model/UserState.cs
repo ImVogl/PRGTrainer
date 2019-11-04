@@ -8,17 +8,22 @@
     public class UserState
     {
         /// <summary>
-        /// Идентификатор пользователя.
+        /// Получает или задает идентификатор пользователя.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Состояние пользователя.
+        /// Имя пользователя.
+        /// </summary>
+        public string User { get; set; }
+
+        /// <summary>
+        /// Получает или задает состояние пользователя.
         /// </summary>
         public UserStates State { get; set; }
 
         /// <summary>
-        /// Время последнего обновления состояния.
+        /// Получает или задает время последнего обновления состояния.
         /// </summary>
         public DateTime LastUpdateTime { get; set; }
     }

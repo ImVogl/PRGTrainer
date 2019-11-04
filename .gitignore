@@ -5,3 +5,4 @@
 /PRGTrainer.Core.Tests/obj/*
 bin
 *.cache
+/PRGTrainer.WebApI/obj/*

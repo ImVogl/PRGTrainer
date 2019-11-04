@@ -12,7 +12,7 @@
     /// <summary>
     /// Контроллер состояний пользователей.
     /// </summary>
-    public class StatesController : ITestStateController, IReferenceBookStateController
+    public class StatesController : ITestStateController, IReferenceBookStateController, IMessageProcessing
     {
         #region Private fields
 
@@ -54,6 +54,8 @@
         /// <param name="telegramBotClient">Клиент Telegram бота.</param>
         public StatesController(ITelegramBotClient telegramBotClient)
         {
+            NewTestCommand = NewTestMessage;
+            FinishCommand = @"Закончить";
             _telegramBotClient = telegramBotClient;
             _states = new List<UserState>();
             _maxInactivityTime = new TimeSpan(4, 0, 0);
@@ -62,6 +64,14 @@
                     @"Для начала работы с ботом выберете один из вариантов:{0}{1} - начать тестирование{0}{2} - посмотреть справочные материалы",
                     Environment.NewLine, NewTestMessage, OpenRefBook);
         }
+
+        /// <inheritdoc />
+        public string NewTestCommand { get; }
+
+        /// <inheritdoc />
+        public string FinishCommand { get; }
+
+        #region Public methods
 
         /// <inheritdoc />
         public bool IsUserTakingTest(int identifier)
@@ -83,10 +93,30 @@
                 return;
 
             if (_states.All(state => state.Id != message.From.Id))
-                NewUserProcess(message.From.Id, message.Text);
+                NewUserProcess(message.From.Id, message.From.Username, message.Text);
             else
                 CheckTimeOut(message.From.Id);
         }
+
+        /// <inheritdoc />
+        public void ResetState(int userId)
+        {
+            var currentUserState = _states.Single(state => state.Id == userId);
+            _states.Remove(currentUserState);
+            _telegramBotClient.SendTextMessageAsync(userId, _startMessage).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public void ResetState(string user)
+        {
+            var currentUserState = _states.Single(state => state.User == user);
+            _states.Remove(currentUserState);
+            _telegramBotClient.SendTextMessageAsync(user, _startMessage).ConfigureAwait(false);
+        }
+
+        #endregion
+
+        #region Private methods
 
         /// <summary>
         /// Проверка состояния 
@@ -109,29 +139,32 @@
         /// Обработка сообщения от нового пользователя.
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
+        /// <param name="user">Имя пользователя.</param>
         /// <param name="text">Текст сообщения пользователя.</param>
-        private void NewUserProcess(int id, string text)
+        private async void NewUserProcess(int id, string user, string text)
         {
             switch (text)
             {
                 case NewTestMessage:
                 {
-                    _states.Add(new UserState { Id = id, State = UserStates.TakingTest, LastUpdateTime = DateTime.Now });
+                    _states.Add(new UserState { Id = id, User = user, State = UserStates.TakingTest, LastUpdateTime = DateTime.Now });
                     break;
                 }
 
                 case OpenRefBook:
                 {
-                    _states.Add(new UserState { Id = id, State = UserStates.UsingRefBook, LastUpdateTime = DateTime.Now });
+                    _states.Add(new UserState { Id = id, User = user, State = UserStates.UsingRefBook, LastUpdateTime = DateTime.Now });
                     break;
                 }
 
                 default:
                 {
-                   _telegramBotClient.SendTextMessageAsync(id, _startMessage).ConfigureAwait(false);
+                   await _telegramBotClient.SendTextMessageAsync(id, _startMessage).ConfigureAwait(false);
                     break;
                 }
             }
         }
+
+        #endregion
     }
 }

@@ -35,10 +35,25 @@
         /// </summary>
         private const string IncorrectXmlStructureMsg = @"Неверная структура файла!";
 
+        /// <summary>
+        /// Значение узла, свидетельствующее о том, что задача подходит членам комиссии с правом решающего голоса.
+        /// </summary>
+        private const string ConclusiveMember = @"Conclusive";
+
+        /// <summary>
+        /// Значение узла, свидетельствующее о том, что задача подходит членам комиссии с совещательного решающего голоса.
+        /// </summary>
+        private const string ConsultativeMember = @"Consultative";
+
+        /// <summary>
+        /// Значение узла, свидетельствующее о том, что задача подходит наблюдателям.
+        /// </summary>
+        private const string Observer = @"Observer";
+
         #endregion
         
         /// <inheritdoc />
-        public IEnumerable<Task> Read()
+        public IEnumerable<TaskInfo> Read()
         {
             var pathToTasksFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, TaskFile);
             var doc = XDocument.Load(pathToTasksFile);
@@ -52,7 +67,7 @@
         /// </summary>
         /// <param name="node">Узел XML документа.</param>
         /// <returns></returns>
-        private Task CreateTask(XElement node)
+        private TaskInfo CreateTask(XElement node)
         {
             if (node.Element(@"correctAnswerId") == null)
                 throw new XmlSchemaException(IncorrectXmlStructureMsg);
@@ -63,6 +78,9 @@
             if (node.Element(@"question") == null)
                 throw new XmlSchemaException(IncorrectXmlStructureMsg);
 
+            if (node.Element(@"memberTypes") == null)
+                throw new XmlSchemaException(IncorrectXmlStructureMsg);
+
             var answers =  node.Elements(@"answer")
                 .Select(c => new Answer { Id = c.Attribute("id").Value, Value = c.Value })
                 .ToList();
@@ -70,14 +88,45 @@
             if (answers.Count != OptionsCount)
                 throw new XmlSchemaException(IncorrectXmlStructureMsg);
 
-            return new Task
+            int correctId;
+            if (int.TryParse(node.Element(@"correctAnswerId").Value, out correctId))
+                throw new XmlSchemaException(@"Не удалось прочесть идентификатор верного варианта ответа!");
+            
+            return new TaskInfo
             {
-                CorrectOption = answers.Single(c => c.Id == node.Element(@"correctAnswerId").Value).Value,
+                CorrectOptionNum = correctId - 1,
+                Options = new List<string>
+                {
+                    answers.Single(c => c.Id == @"1").Value,
+                    answers.Single(c => c.Id == @"2").Value,
+                    answers.Single(c => c.Id == @"3").Value
+                },
+
                 Explanation = node.Element(@"explanation").Value,
-                FirstWrongOption = answers.First(c => c.Id != node.Element(@"correctAnswerId").Value).Value,
-                SecondWrongOption = answers.Last(c => c.Id != node.Element(@"correctAnswerId").Value).Value,
-                Question = node.Element(@"question").Value
+                Question = node.Element(@"question").Value,
+                TargetMembers = GetTargetMembers(node.Element(@"memberTypes").Value)
             };
+        }
+
+        /// <summary>
+        /// Получает коллекцию участников избирательного процесса, для которых доступен вопрос.
+        /// </summary>
+        /// <param name="memberTypes">Строка с типами участников избирательного процесса.</param>
+        /// <returns>Коллекция типов участников избирательного процесса.</returns>
+        private static IEnumerable<MemberType> GetTargetMembers(string memberTypes)
+        {
+            var typeCollections = new List<MemberType>();
+            var parsedTypes = memberTypes.Split(',').Select(c => c.Trim(' ')).ToList();
+            if (parsedTypes.Any(c => c == ConclusiveMember))
+                typeCollections.Add(MemberType.Conclusive);
+
+            if (parsedTypes.Any(c => c == ConsultativeMember))
+                typeCollections.Add(MemberType.Consultative);
+
+            if(parsedTypes.Any(c => c == Observer))
+                typeCollections.Add(MemberType.Observer);
+
+            return typeCollections;
         }
     }
 }

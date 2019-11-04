@@ -9,7 +9,7 @@
     public class SqlTasksReader : ITasksReader
     {
         /// <inheritdoc />
-        public IEnumerable<Task> Read()
+        public IEnumerable<TaskInfo> Read()
         {
             throw new System.NotImplementedException();
         }

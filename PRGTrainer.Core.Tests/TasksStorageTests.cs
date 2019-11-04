@@ -17,12 +17,12 @@
         [SetUp]
         public void SetUp()
         {
-            var taskCollection = new List<Task>
+            var taskCollection = new List<TaskInfo>
             {
-                new Task { Question = @"Question 1" },
-                new Task { Question = @"Question 2" },
-                new Task { Question = @"Question 3" },
-                new Task { Question = @"Question 4" }
+                new TaskInfo { Question = @"Question 1" },
+                new TaskInfo { Question = @"Question 2" },
+                new TaskInfo { Question = @"Question 3" },
+                new TaskInfo { Question = @"Question 4" }
             };
 
             _taskReader.Setup(c => c.Read()).Returns(taskCollection);
