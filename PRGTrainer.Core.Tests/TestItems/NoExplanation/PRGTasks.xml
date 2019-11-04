@@ -6,5 +6,6 @@
 		<answer id = "2">Correct 1.</answer>
 		<answer id = "3">Incorrect 1.2.</answer>
 		<correctAnswerId>2</correctAnswerId>
+	  <memberTypes>Conclusive</memberTypes>
 	</task>
 </tasks>

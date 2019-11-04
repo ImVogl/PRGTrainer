@@ -12,6 +12,6 @@
         /// Чтение коллекции задач из файла с задачами.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<Task> Read();
+        IEnumerable<TaskInfo> Read();
     }
 }

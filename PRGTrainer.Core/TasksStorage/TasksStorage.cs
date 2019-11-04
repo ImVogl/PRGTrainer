@@ -21,7 +21,7 @@
         /// <summary>
         /// Коллекция задач.
         /// </summary>
-        private List<Task> _tasks;
+        private List<TaskInfo> _tasks;
 
         #endregion
         
@@ -35,24 +35,48 @@
         }
 
         /// <inheritdoc />
-        public IEnumerable<Task> GetTasks(int num)
+        public IEnumerable<TaskInfo> GetTasksForConclusiveMembers(int num)
         {
-            var randomList = new List<Task>();
-            var random = new Random();
-            while (_tasks.Count > 0)
-            {
-                var randomIndex = random.Next(0, _tasks.Count);
-                randomList.Add(_tasks[randomIndex]);
-                _tasks.RemoveAt(randomIndex);
-            }
+            return GetTasks(num, MemberType.Conclusive);
+        }
 
-            return randomList.Take(num);
+        /// <inheritdoc />
+        public IEnumerable<TaskInfo> GetTasksForConsultativeMembers(int num)
+        {
+            return GetTasks(num, MemberType.Consultative);
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<TaskInfo> GetTasksForObservers(int num)
+        {
+            return GetTasks(num, MemberType.Observer);
         }
 
         /// <inheritdoc />
         public void FillStorage()
         {
             _tasks = _tasksReader.Read().ToList();
+        }
+
+        /// <summary>
+        /// Получение коллекции задач.
+        /// </summary>
+        /// <param name="num">Число задач.</param>
+        /// <param name="type">Тип задач.</param>
+        /// <returns>Коллекция задач.</returns>
+        private IEnumerable<TaskInfo> GetTasks(int num, MemberType type)
+        {
+            var randomList = new List<TaskInfo>();
+            var tempTasksCollection = new List<TaskInfo>(_tasks.Where(c => c.TargetMembers.Contains(type)));
+            var random = new Random();
+            while (tempTasksCollection.Count > 0)
+            {
+                var randomIndex = random.Next(0, tempTasksCollection.Count);
+                randomList.Add(tempTasksCollection[randomIndex]);
+                tempTasksCollection.RemoveAt(randomIndex);
+            }
+
+            return randomList.Take(num);
         }
     }
 }

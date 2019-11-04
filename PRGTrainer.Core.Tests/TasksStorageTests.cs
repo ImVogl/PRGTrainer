@@ -17,12 +17,12 @@
         [SetUp]
         public void SetUp()
         {
-            var taskCollection = new List<Task>
+            var taskCollection = new List<TaskInfo>
             {
-                new Task { Question = @"Question 1" },
-                new Task { Question = @"Question 2" },
-                new Task { Question = @"Question 3" },
-                new Task { Question = @"Question 4" }
+                new TaskInfo { Question = @"Question 1", TargetMembers = new List<MemberType> { MemberType.Conclusive }},
+                new TaskInfo { Question = @"Question 2", TargetMembers = new List<MemberType> { MemberType.Conclusive } },
+                new TaskInfo { Question = @"Question 3", TargetMembers = new List<MemberType> { MemberType.Conclusive } },
+                new TaskInfo { Question = @"Question 4", TargetMembers = new List<MemberType> { MemberType.Conclusive } }
             };
 
             _taskReader.Setup(c => c.Read()).Returns(taskCollection);
@@ -33,7 +33,7 @@
         [Test, Description(@"Число запрашиваемых задач больше числа задач в коллекции.")]
         public void InputCountGreatThanArrayCount()
         {
-            var tasks = _tasksStorage.GetTasks(int.MaxValue).ToList();
+            var tasks = _tasksStorage.GetTasksForConclusiveMembers(int.MaxValue).ToList();
             
             Assert.That(tasks.Count, Is.EqualTo(4));
         }
@@ -41,7 +41,7 @@
         [Test, Description(@"Задачи не должны повторяться.")]
         public void TaskShouldBeUnique()
         {
-            var tasks = _tasksStorage.GetTasks(4).ToList();
+            var tasks = _tasksStorage.GetTasksForConclusiveMembers(4).ToList();
 
             Assert.That(tasks.Count(c => c.Question == @"Question 1"), Is.EqualTo(1));
             Assert.That(tasks.Count(c => c.Question == @"Question 2"), Is.EqualTo(1));

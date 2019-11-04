@@ -36,12 +36,19 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=4.9.4.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.4.9.4\lib\net45\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Annotations, Version=2019.1.3.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.2019.1.3\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,16 +61,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Answer.cs" />
-    <Compile Include="Model\Task.cs" />
+    <Compile Include="Model\MemberType.cs" />
+    <Compile Include="Model\TaskInfo.cs" />
+    <Compile Include="Model\UserState.cs" />
+    <Compile Include="Model\UserStates.cs" />
+    <Compile Include="Model\UserTestState.cs" />
+    <Compile Include="TrainerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatisticsCollector\IStatisticsCollector.cs" />
+    <Compile Include="StatisticsCollector\StatisticsCollector.cs" />
+    <Compile Include="TasksProcessing\ITasksProcessing.cs" />
+    <Compile Include="TasksProcessing\TasksProcessing.cs" />
     <Compile Include="TasksReaders\ITasksReader.cs" />
-    <Compile Include="TasksReaders\PRGTasksReader.cs" />
+    <Compile Include="TasksReaders\FileTasksReader.cs" />
+    <Compile Include="TasksReaders\SqlTasksReader.cs" />
     <Compile Include="TasksStorage\ITasksStorage.cs" />
     <Compile Include="TasksStorage\TasksStorage.cs" />
     <Compile Include="TelegramHandler\ITelegramHandler.cs" />
     <Compile Include="TelegramHandler\LawTest\ILawTest.cs" />
     <Compile Include="TelegramHandler\LawTest\LawTest.cs" />
+    <Compile Include="TelegramHandler\StatesController\IReferenceBookStateController.cs" />
+    <Compile Include="TelegramHandler\StatesController\IStateController.cs" />
+    <Compile Include="TelegramHandler\StatesController\ITestStateController.cs" />
+    <Compile Include="TelegramHandler\StatesController\StatesController.cs" />
     <Compile Include="TelegramHandler\TelegramHandler.cs" />
+    <Compile Include="TelegramHandler\IMessageProcessing.cs" />
+    <Compile Include="TelegramHandler\TestAnswerProcessing\TestAnswerProcessing.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
