@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.Threading;
+    using JetBrains.Annotations;
     using TasksStorage;
     using Telegram.Bot;
 
@@ -36,10 +37,10 @@
         /// </summary>
         /// <param name="tasksStorage">Хранилище задач.</param>
         /// <param name="messageProcessors">Обработчики текстовых сообщений.</param>
-        public TelegramHandler(ITasksStorage tasksStorage, IEnumerable<IMessageProcessing> messageProcessors)
+        /// <param name="telegramBotClient">Клиент telegram.</param>
+        public TelegramHandler(ITasksStorage tasksStorage, IEnumerable<IMessageProcessing> messageProcessors, [NotNull] ITelegramBotClient telegramBotClient)
         {
-            var token = ConfigurationManager.AppSettings[@"telegramToken"];
-            _telegramBotClient = new TelegramBotClient(token);
+            _telegramBotClient = telegramBotClient;
             _tasksStorage = tasksStorage;
             _messageProcessors = messageProcessors;
         }

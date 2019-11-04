@@ -1,10 +1,12 @@
 ﻿namespace PRGTrainer.Core
 {
+    using System.Configuration;
     using Autofac;
     using StatisticsCollector;
     using TasksProcessing;
     using TasksReaders;
     using TasksStorage;
+    using Telegram.Bot;
     using TelegramHandler;
     using TelegramHandler.StatesController;
     using TelegramHandler.TestAnswerProcessing;
@@ -17,6 +19,11 @@
         /// <inheritdoc />
         protected override void Load(ContainerBuilder builder)
         {
+            var token = ConfigurationManager.AppSettings[@"telegramToken"];
+            builder.Register(c => new TelegramBotClient(token))
+                .As<ITelegramBotClient>()
+                .SingleInstance();
+
             builder.RegisterType<FileTasksReader>()
                 .As<ITasksReader>()
                 .SingleInstance();
@@ -42,10 +49,11 @@
             builder.RegisterType<TestAnswerProcessing>()
                 .As<IMessageProcessing>()
                 .SingleInstance();
-
+            
             builder.RegisterType<TelegramHandler.TelegramHandler>()
                 .As<ITelegramHandler>()
                 .SingleInstance();
+                
         }
     }
 }

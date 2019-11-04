@@ -1,9 +1,7 @@
 ﻿namespace PRGTrainer
 {
-    using System.Collections.Generic;
     using Autofac;
     using Core;
-    using Core.TasksStorage;
     using Core.TelegramHandler;
     using Topshelf;
 
@@ -14,8 +12,7 @@
             var builder = new ContainerBuilder();
             builder.RegisterModule<TrainerModule>();
             var container = builder.Build();
-            var taskStorage = container.Resolve<ITasksStorage>();
-            var messageProcessors = container.Resolve<IEnumerable<IMessageProcessing>>();
+            var handler = container.Resolve<ITelegramHandler>();
 
             HostFactory.Run(
                 host =>
@@ -25,7 +22,7 @@
                     host.Service<ITelegramHandler>(
                         configurator =>
                         {
-                            configurator.ConstructUsing(() => new TelegramHandler(taskStorage, messageProcessors));
+                            configurator.ConstructUsing(() => handler);
                             configurator.WhenStarted(m => m.InitialiseSession());
                             configurator.WhenStopped(m => m.Dispose());
                             configurator.WhenPaused(m => { });

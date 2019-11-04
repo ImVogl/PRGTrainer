@@ -8,6 +8,7 @@
     using Telegram.Bot;
     using Telegram.Bot.Args;
     using Telegram.Bot.Types.Enums;
+    using Telegram.Bot.Types.ReplyMarkups;
 
     /// <summary>
     /// Контроллер состояний пользователей.
@@ -103,15 +104,7 @@
         {
             var currentUserState = _states.Single(state => state.Id == userId);
             _states.Remove(currentUserState);
-            _telegramBotClient.SendTextMessageAsync(userId, _startMessage).ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public void ResetState(string user)
-        {
-            var currentUserState = _states.Single(state => state.User == user);
-            _states.Remove(currentUserState);
-            _telegramBotClient.SendTextMessageAsync(user, _startMessage).ConfigureAwait(false);
+            _telegramBotClient.SendTextMessageAsync(userId, _startMessage, replyMarkup: new ReplyKeyboardRemove());
         }
 
         #endregion
@@ -124,7 +117,7 @@
         /// <param name="id">Идентификатор пользователя.</param>
         private void CheckTimeOut(int id)
         {
-            if (_states.Any(state => state.Id == id))
+            if (_states.All(state => state.Id != id))
                 throw new ArgumentOutOfRangeException(nameof(id), @"Не существует пользователя с заданным идентификатором в коллекции состояний.");
 
             if (_states.Count(state => state.Id == id) != 1)
@@ -133,6 +126,8 @@
             var currentUserState = _states.Single(state => state.Id == id);
             if (currentUserState.LastUpdateTime - DateTime.Now > _maxInactivityTime)
                 _states.Remove(currentUserState);
+            else
+                _states[_states.IndexOf(currentUserState)].LastUpdateTime = DateTime.Now;
         }
 
         /// <summary>

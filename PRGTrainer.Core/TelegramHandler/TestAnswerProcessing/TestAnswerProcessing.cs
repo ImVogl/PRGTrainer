@@ -75,21 +75,6 @@
         private readonly ITasksStorage _tasksStorage;
 
         /// <summary>
-        /// Коллекция задач для пользователя с заданным именем.
-        /// </summary>
-        private readonly Dictionary<string, List<TaskInfo>> _tasks;
-
-        /// <summary>
-        /// Номер текущей задачи для пользователя с заданным именем.
-        /// </summary>
-        private readonly Dictionary<string, int> _currentTaskNum;
-
-        /// <summary>
-        /// Словарь с результатами теста для пользователя.
-        /// </summary>
-        private readonly Dictionary<string, List<bool>> _testResults;
-
-        /// <summary>
         /// Обработчик задач.
         /// </summary>
         private readonly ITasksProcessing _tasksProcessing;
@@ -105,9 +90,9 @@
         private readonly IStatisticsCollector _statisticsCollector;
 
         /// <summary>
-        /// Состояние пользователя внутри теста.
+        /// Состояние пользователя.
         /// </summary>
-        private string _subState;
+        private readonly Dictionary<int, UserTestState> _subStates;
 
         #endregion
 
@@ -122,12 +107,9 @@
         public TestAnswerProcessing(ITelegramBotClient telegramBotClient, ITestStateController testStateController,
             ITasksStorage tasksStorage, ITasksProcessing tasksProcessing, IStatisticsCollector statisticsCollector)
         {
-            _tasks = new Dictionary<string, List<TaskInfo>>();
-            _currentTaskNum = new Dictionary<string, int>();
-            _testResults = new Dictionary<string, List<bool>>();
+            _subStates = new Dictionary<int, UserTestState>();
             _telegramBotClient = telegramBotClient;
             _tasksProcessing = tasksProcessing;
-            _subState = StateChoice;
             _testStateController = testStateController;
             _tasksStorage = tasksStorage;
             _statisticsCollector = statisticsCollector;
@@ -143,16 +125,14 @@
             if (!_testStateController.IsUserTakingTest(message.From.Id))
                 return;
 
-            if (message.Text == _testStateController.NewTestCommand)
-                return;
-
             if (message.Text == _testStateController.FinishCommand)
             {
+                _subStates.Remove(message.From.Id);
                 _testStateController.ResetState(message.From.Id);
                 return;
             }
 
-            ProcessMessage(message.From.Username, message.Text);
+            ProcessMessage(message.From.Id, message.From.Username, message.Text);
         }
 
         #region Private methods
@@ -160,64 +140,91 @@
         /// <summary>
         /// Обработка команд.
         /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="command">Команда.</param>
-        private void ProcessMessage(string user, string command)
+        private void ProcessMessage(int id, string user, string command)
         {
-            switch (_subState)
+            if ((!_subStates.ContainsKey(id) || _subStates[id].SubState == StateChoice) && ChoiceCommands.Contains(command))
             {
-                case StateChoice:
-                {
-                    if (ChoiceCommands.Contains(command))
-                    {
-                        _subState = StateTest;
-                        _currentTaskNum[user] = 0;
-                        _testResults[user] = new List<bool>(QuestionsNumbers);
-                        SetQuestions(user, command);
-                        SendQuestion(user);
-                    }
-
-                    break;
-                }
-
-                case StateTest:
-                {
-                    if (AnswerCommands.Contains(command))
-                    {
-                        _currentTaskNum[user] += 1;
-                        ProcessAnswer(user, command);
-                        SendQuestion(user);
-                    }
-
-                    break;
-                }
+                SetQuestions(id, user, command);
+                _subStates[id].SubState = StateTest;
+                _subStates[id].CurrentTaskNum = 0;
+                SendQuestion(id);
+                return;
             }
+
+            if (AnswerCommands.Contains(command) && _subStates[id].SubState == StateTest)
+            {
+                _subStates[id].CurrentTaskNum += 1;
+                ProcessAnswer(id, user, command);
+                SendQuestion(id);
+            }
+
+            if (command == _testStateController.NewTestCommand)
+                StartTest(id);
+        }
+
+        /// <summary>
+        /// Начало тестирования.
+        /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
+        private void StartTest(int id)
+        {
+            const string message = @"Выберете вариант тестов.";
+            var keyboard = new ReplyKeyboardMarkup(CreateStartTestButtons());
+            _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard);
         }
 
         /// <summary>
         /// Задает коллекцию вопросов.
         /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="command">Команда с типом вопросов.</param>
-        private void SetQuestions(string user, string command)
+        private void SetQuestions(int id, string user, string command)
         {
             switch (command)
             {
                 case ConclusiveRoleMember:
                 {
-                    _tasks[user] = _tasksStorage.GetTasksForConclusiveMembers(QuestionsNumbers).ToList();
+                    _subStates[id] = new UserTestState
+                    {
+                        User = user,
+                        TasksInfos = _tasksStorage.GetTasksForConclusiveMembers(QuestionsNumbers).ToList(),
+                        Results = new List<bool>(),
+                        SubState = StateChoice
+                    };
+
                     break;
                 }
 
                 case ConsultativeRoleMember:
                 {
-                    _tasks[user] = _tasksStorage.GetTasksForConsultativeMembers(QuestionsNumbers).ToList();
+                    _subStates[id] = new UserTestState
+                    {
+                        User = user,
+                        TasksInfos = _tasksStorage.GetTasksForConsultativeMembers(QuestionsNumbers).ToList(),
+                        Results = new List<bool>(),
+                        SubState = StateChoice
+
+                    };
+
                     break;
                 }
 
                 case Observer:
                 {
-                    _tasks[user] = _tasksStorage.GetTasksForObservers(QuestionsNumbers).ToList();
+                    _subStates[id] = new UserTestState
+                    {
+                        User = user,
+                        TasksInfos = _tasksStorage.GetTasksForObservers(QuestionsNumbers).ToList(),
+                        CurrentTaskNum = 0,
+                        Results = new List<bool>(),
+                        SubState = StateChoice
+
+                    };
+
                     break;
                 }
             }
@@ -226,84 +233,103 @@
         /// <summary>
         /// Отправляет вопрос пользователю.
         /// </summary>
-        /// <param name="user">Имя пользователя.</param>
-        private void SendQuestion(string user)
+        /// <param name="id">Идентификатор пользователя.</param>
+        private void SendQuestion(int id)
         {
-            var questions = AnswerCommands.Zip(_tasks[user][_currentTaskNum[user]].Options,
-                (intro, question) => intro + " " + question);
+            var questions = AnswerCommands.Zip(_subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Options,
+                (intro, question) => intro + ": " + question + Environment.NewLine);
 
-            var message = string.Format(@"Вопрос {0}/{1}:{2}{3}{4}", 
-                _currentTaskNum[user] + 1,
-                _tasks[user].Count + 1,
-                _tasks[user][_currentTaskNum[user]].Question,
+            var message = string.Format(@"Вопрос {0}/{1}: {2}{3}{4}",
+                _subStates[id].CurrentTaskNum + 1,
+                _subStates[id].TasksInfos.Count + 1,
+                _subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Question,
                 Environment.NewLine,
                 string.Join(Environment.NewLine, questions));
 
-            var keyboard = new ReplyKeyboardMarkup(CreateButtons());
-            _telegramBotClient.SendTextMessageAsync(user, message, replyMarkup: keyboard);
+            var keyboard = new ReplyKeyboardMarkup(CreateTestButtons());
+            _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard);
         }
 
         /// <summary>
         /// Обработка ответа пользователя.
         /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="answer">Ответ пользователя.</param>
-        private void ProcessAnswer(string user, string answer)
+        private void ProcessAnswer(int id, string user, string answer)
         {
-            var isAnswerCorrect = _tasksProcessing.IsAnswerCorrect(_tasks[user][_currentTaskNum[user]], AnswerCommands.IndexOf(answer));
-            _testResults[user][_currentTaskNum[user]] = isAnswerCorrect;
+            
+            var isAnswerCorrect = _tasksProcessing.IsAnswerCorrect(_subStates[id].TasksInfos[_subStates[id].CurrentTaskNum], AnswerCommands.IndexOf(answer));
+            _subStates[id].Results.Add(isAnswerCorrect);
             var message = isAnswerCorrect
                 ? "Верно!\n\r"
                 : string.Format(@"Неверно!{0}Объяснение: {0}{1}{0}", Environment.NewLine,
-                    _tasks[user][_currentTaskNum[user]].Explanation);
+                    _subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Explanation);
 
-            _telegramBotClient.SendTextMessageAsync(user, message);
+            _telegramBotClient.SendTextMessageAsync(id, message);
 
-            if (_currentTaskNum[user] == _tasks[user].Count)
+            if (_subStates[id].CurrentTaskNum == _subStates[id].TasksInfos.Count)
             {
-                _testStateController.ResetState(user);
-                SaveStatistic(user);
-                SendResult(user);
+                _testStateController.ResetState(id);
+                SaveStatistic(id, user);
+                SendResult(id);
             }
         }
 
         /// <summary>
         /// Сохранение результатов пользователя.
         /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Пользователь.</param>
-        private void SaveStatistic(string user)
+        private void SaveStatistic(int id, string user)
         {
             var result = new List<string>();
-            for (var i = 0; i < _tasks[user].Count; i++)
-                if (_testResults[user][i])
-                    result.Add(_tasks[user][i].Question);
+            for (var i = 0; i < _subStates[id].TasksInfos.Count; i++)
+                if (_subStates[id].Results[i])
+                    result.Add(_subStates[id].TasksInfos[i].Question);
 
             _statisticsCollector.SaveResult(result);
-            var successRate = 100 * _testResults[user].Count(c => c) / _testResults[user].Count;
+            var successRate = 100 * _subStates[id].Results.Count(c => c) / _subStates[id].Results.Count;
             _statisticsCollector.SaveUserResult(user, successRate);
         }
 
         /// <summary>
         /// Отправляет результаты прохождения теста пользователю.
         /// </summary>
-        /// <param name="user">Пользователь.</param>
-        private void SendResult(string user)
+        /// <param name="id">Идентификатор пользователя.</param>
+        private void SendResult(int id)
         {
-            var message = string.Format(@"Ваш результат: {0:N2}%", 100 * _testResults[user].Count(c => c) / _testResults[user].Count);
-            _telegramBotClient.SendTextMessageAsync(user, message);
+            var message = string.Format(@"Ваш результат: {0:N2}%", 100 * _subStates[id].Results.Count(c => c) / _subStates[id].Results.Count);
+            _telegramBotClient.SendTextMessageAsync(id, message);
         }
 
         /// <summary>
-        /// Создание коллекции вертикально расположенных кнопок.
+        /// Создание коллекции кнопок с вариантами ответа.
         /// </summary>
         /// <returns>Коллекция кнопок.</returns>
-        private KeyboardButton[][] CreateButtons()
+        private KeyboardButton[][] CreateTestButtons()
         {
             return new[]
             {
                 new[] { new KeyboardButton(AnswerCommands[0]) },
                 new[] { new KeyboardButton(AnswerCommands[1]) },
-                new[] { new KeyboardButton(AnswerCommands[2]) }
+                new[] { new KeyboardButton(AnswerCommands[2]) },
+                new[] { new KeyboardButton(_testStateController.FinishCommand) }
+            };
+        }
+
+        /// <summary>
+        /// Создание кнопок для страницы с выбором настроек теста.
+        /// </summary>
+        /// <returns></returns>
+        private KeyboardButton[][] CreateStartTestButtons()
+        {
+            return new[]
+            {
+                new[] { new KeyboardButton(ConclusiveRoleMember) },
+                new[] { new KeyboardButton(ConsultativeRoleMember) },
+                new[] { new KeyboardButton(Observer) },
+                new[] { new KeyboardButton(_testStateController.FinishCommand) }
             };
         }
 

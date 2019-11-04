@@ -15,11 +15,5 @@
         /// </summary>
         /// <param name="userId">Идентификатор пользователя.</param>
         void ResetState(int userId);
-
-        /// <summary>
-        /// Сброс состояния.
-        /// </summary>
-        /// <param name="user">Имя пользователя.</param>
-        void ResetState(string user);
     }
 }
