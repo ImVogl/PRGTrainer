@@ -184,46 +184,36 @@
         /// <param name="command">Команда с типом вопросов.</param>
         private void SetQuestions(int id, string user, string command)
         {
+            _subStates[id] = new UserTestState
+            {
+                User = user,
+                Results = new List<bool>(),
+                SubState = StateChoice
+            };
+
             switch (command)
             {
                 case ConclusiveRoleMember:
                 {
-                    _subStates[id] = new UserTestState
-                    {
-                        User = user,
-                        TasksInfos = _tasksStorage.GetTasksForConclusiveMembers(QuestionsNumbers).ToList(),
-                        Results = new List<bool>(),
-                        SubState = StateChoice
-                    };
+                    _subStates[id].TasksInfos = _tasksStorage.GetTasksForConclusiveMembers(QuestionsNumbers)
+                        .Select(c => _tasksProcessing.Shake(c)).ToList();
 
                     break;
                 }
 
                 case ConsultativeRoleMember:
                 {
-                    _subStates[id] = new UserTestState
-                    {
-                        User = user,
-                        TasksInfos = _tasksStorage.GetTasksForConsultativeMembers(QuestionsNumbers).ToList(),
-                        Results = new List<bool>(),
-                        SubState = StateChoice
+                    _subStates[id].TasksInfos = _tasksStorage.GetTasksForConsultativeMembers(QuestionsNumbers)
+                        .Select(c => _tasksProcessing.Shake(c)).ToList();
 
-                    };
 
                     break;
                 }
 
                 case Observer:
                 {
-                    _subStates[id] = new UserTestState
-                    {
-                        User = user,
-                        TasksInfos = _tasksStorage.GetTasksForObservers(QuestionsNumbers).ToList(),
-                        CurrentTaskNum = 0,
-                        Results = new List<bool>(),
-                        SubState = StateChoice
-
-                    };
+                    _subStates[id].TasksInfos = _tasksStorage.GetTasksForObservers(QuestionsNumbers)
+                        .Select(c => _tasksProcessing.Shake(c)).ToList();
 
                     break;
                 }
