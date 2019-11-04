@@ -71,8 +71,8 @@
             var random = new Random();
             while (tempTasksCollection.Count > 0)
             {
-                var randomIndex = random.Next(0, _tasks.Count);
-                randomList.Add(_tasks[randomIndex]);
+                var randomIndex = random.Next(0, tempTasksCollection.Count);
+                randomList.Add(tempTasksCollection[randomIndex]);
                 tempTasksCollection.RemoveAt(randomIndex);
             }
 

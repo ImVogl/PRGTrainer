@@ -89,7 +89,7 @@
                 throw new XmlSchemaException(IncorrectXmlStructureMsg);
 
             int correctId;
-            if (int.TryParse(node.Element(@"correctAnswerId").Value, out correctId))
+            if (!int.TryParse(node.Element(@"correctAnswerId").Value, out correctId))
                 throw new XmlSchemaException(@"Не удалось прочесть идентификатор верного варианта ответа!");
             
             return new TaskInfo

@@ -22,16 +22,16 @@
             Assert.That(tasks.Count, Is.EqualTo(2));
 
             var firstTask = tasks.First();
-            Assert.That(firstTask.CorrectOption, Is.EqualTo(@"Correct 1."));
-            Assert.That(firstTask.FirstWrongOption, Is.EqualTo(@"Incorrect 1.1."));
-            Assert.That(firstTask.SecondWrongOption, Is.EqualTo(@"Incorrect 1.2."));
+            Assert.That(firstTask.Options.ToList()[1], Is.EqualTo(@"Correct 1."));
+            Assert.That(firstTask.Options.ToList()[0], Is.EqualTo(@"Incorrect 1.1."));
+            Assert.That(firstTask.Options.ToList()[2], Is.EqualTo(@"Incorrect 1.2."));
             Assert.That(firstTask.Question, Is.EqualTo(@"Question 1"));
             Assert.That(firstTask.Explanation, Is.EqualTo(@"Explanation 1."));
 
             var secondTask = tasks.Last();
-            Assert.That(secondTask.CorrectOption, Is.EqualTo(@"Correct 2."));
-            Assert.That(secondTask.FirstWrongOption, Is.EqualTo(@"Incorrect 2.1."));
-            Assert.That(secondTask.SecondWrongOption, Is.EqualTo(@"Incorrect 2.2."));
+            Assert.That(secondTask.Options.ToList()[0], Is.EqualTo(@"Correct 2."));
+            Assert.That(secondTask.Options.ToList()[1], Is.EqualTo(@"Incorrect 2.1."));
+            Assert.That(secondTask.Options.ToList()[2], Is.EqualTo(@"Incorrect 2.2."));
             Assert.That(secondTask.Question, Is.EqualTo(@"Question 2"));
             Assert.That(secondTask.Explanation, Is.EqualTo(@"Explanation 2."));
         }
