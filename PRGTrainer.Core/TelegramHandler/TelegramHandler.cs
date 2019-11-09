@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Threading;
     using JetBrains.Annotations;
+    using MessageProcessing;
     using TasksStorage;
     using Telegram.Bot;
 

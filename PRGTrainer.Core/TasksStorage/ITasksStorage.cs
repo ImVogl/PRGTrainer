@@ -1,7 +1,7 @@
 ﻿namespace PRGTrainer.Core.TasksStorage
 {
     using System.Collections.Generic;
-    using Model;
+    using Model.Test;
 
     /// <summary>
     /// Интерфейс хранилища вопросов.

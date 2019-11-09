@@ -8,8 +8,8 @@
     using TasksStorage;
     using Telegram.Bot;
     using TelegramHandler;
+    using TelegramHandler.MessageProcessing;
     using TelegramHandler.StatesController;
-    using TelegramHandler.TestAnswerProcessing;
 
     /// <summary>
     /// Регистрация классов.
@@ -49,7 +49,11 @@
             builder.RegisterType<TestAnswerProcessing>()
                 .As<IMessageProcessing>()
                 .SingleInstance();
-            
+
+            builder.RegisterType<ReferenceBookProcessing>()
+                .As<IMessageProcessing>()
+                .SingleInstance();
+
             builder.RegisterType<TelegramHandler.TelegramHandler>()
                 .As<ITelegramHandler>()
                 .SingleInstance();

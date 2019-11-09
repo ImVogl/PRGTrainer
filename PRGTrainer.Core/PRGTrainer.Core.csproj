@@ -60,12 +60,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\Answer.cs" />
-    <Compile Include="Model\MemberType.cs" />
-    <Compile Include="Model\TaskInfo.cs" />
+    <Compile Include="Model\Test\Answer.cs" />
+    <Compile Include="Model\Test\MemberType.cs" />
+    <Compile Include="Model\Test\TaskInfo.cs" />
     <Compile Include="Model\UserState.cs" />
     <Compile Include="Model\UserStates.cs" />
-    <Compile Include="Model\UserTestState.cs" />
+    <Compile Include="Model\Test\UserTestState.cs" />
+    <Compile Include="TelegramHandler\MessageProcessing\ReferenceBookProcessing.cs" />
     <Compile Include="TrainerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatisticsCollector\IStatisticsCollector.cs" />
@@ -85,8 +86,8 @@
     <Compile Include="TelegramHandler\StatesController\ITestStateController.cs" />
     <Compile Include="TelegramHandler\StatesController\StatesController.cs" />
     <Compile Include="TelegramHandler\TelegramHandler.cs" />
-    <Compile Include="TelegramHandler\IMessageProcessing.cs" />
-    <Compile Include="TelegramHandler\TestAnswerProcessing\TestAnswerProcessing.cs" />
+    <Compile Include="TelegramHandler\MessageProcessing\IMessageProcessing.cs" />
+    <Compile Include="TelegramHandler\MessageProcessing\TestAnswerProcessing.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -98,6 +99,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Model\ReferenceBook\" />
     <Folder Include="TelegramHandler\ReferenceBook\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,9 +1,9 @@
-﻿namespace PRGTrainer.Core.TelegramHandler.TestAnswerProcessing
+﻿namespace PRGTrainer.Core.TelegramHandler.MessageProcessing
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Model;
+    using Model.Test;
     using StatesController;
     using StatisticsCollector;
     using TasksProcessing;

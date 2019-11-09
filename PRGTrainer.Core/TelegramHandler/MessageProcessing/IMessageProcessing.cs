@@ -1,4 +1,4 @@
-﻿namespace PRGTrainer.Core.TelegramHandler
+﻿namespace PRGTrainer.Core.TelegramHandler.MessageProcessing
 {
     using Telegram.Bot.Args;
 
