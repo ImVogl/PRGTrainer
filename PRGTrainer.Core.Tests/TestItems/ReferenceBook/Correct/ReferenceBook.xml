@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<parts>
+  <part Name = "Первый раздел" >
+    <subpart Name = "Первый подраздел" >
+      <content>Содержимое раздела.</content>
+    </subpart>
+    <subpart Name = "Второй подраздел">
+      <subpart Name = "Первый параграф" >
+        <content>Содержимое параграфа.</content>
+      </subpart>
+    </subpart>
+  </part>
+  <part Name = "Второй раздел" >
+    <content>Содержимое корневого раздела.</content>
+    <subpart Name = "Первый подраздел">
+      <content>Содержимое раздела.</content>
+    </subpart>
+  </part>
+</parts>

@@ -60,12 +60,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\ReferenceBook\ReferenceBookPart.cs" />
     <Compile Include="Model\Test\Answer.cs" />
     <Compile Include="Model\Test\MemberType.cs" />
     <Compile Include="Model\Test\TaskInfo.cs" />
     <Compile Include="Model\UserState.cs" />
     <Compile Include="Model\UserStates.cs" />
     <Compile Include="Model\Test\UserTestState.cs" />
+    <Compile Include="ReferenceBookReaders\FileReferenceBookReader.cs" />
+    <Compile Include="ReferenceBookReaders\IReferenceBookReader.cs" />
+    <Compile Include="ReferenceBookStorage\IReferenceBookStorage.cs" />
+    <Compile Include="ReferenceBookStorage\ReferenceBookStorage.cs" />
     <Compile Include="TelegramHandler\MessageProcessing\ReferenceBookProcessing.cs" />
     <Compile Include="TrainerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -97,9 +102,11 @@
     <Content Include="PRGTasks.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ReferenceBook.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Model\ReferenceBook\" />
     <Folder Include="TelegramHandler\ReferenceBook\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

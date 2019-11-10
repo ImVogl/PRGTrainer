@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnswerProcessingTests.cs" />
+    <Compile Include="ReferenceBookReaderTests.cs" />
     <Compile Include="TasksProcessingTests.cs" />
     <Compile Include="TasksReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -100,7 +101,20 @@
     <Content Include="TestItems\NoQuestion\PRGTasks.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestItems\ReferenceBook\Correct\ReferenceBook.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestItems\ReferenceBook\EmptyNameAttribute\ReferenceBook.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestItems\ReferenceBook\EmptyPart\ReferenceBook.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestItems\ReferenceBook\NoNameAttribute\ReferenceBook.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
