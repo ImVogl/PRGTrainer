@@ -2,6 +2,8 @@
 {
     using System.Configuration;
     using Autofac;
+    using ReferenceBookReaders;
+    using ReferenceBookStorage;
     using StatisticsCollector;
     using TasksProcessing;
     using TasksReaders;
@@ -28,8 +30,16 @@
                 .As<ITasksReader>()
                 .SingleInstance();
 
+            builder.RegisterType<FileReferenceBookReader>()
+                .As<IReferenceBookReader>()
+                .SingleInstance();
+
             builder.RegisterType<TasksStorage.TasksStorage>()
                 .As<ITasksStorage>()
+                .SingleInstance();
+
+            builder.RegisterType<ReferenceBookStorage.ReferenceBookStorage>()
+                .As<IReferenceBookStorage>()
                 .SingleInstance();
 
             builder.RegisterType<StatisticsCollector.StatisticsCollector>()

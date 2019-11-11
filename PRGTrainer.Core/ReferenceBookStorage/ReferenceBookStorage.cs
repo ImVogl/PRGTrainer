@@ -1,34 +1,62 @@
 ﻿namespace PRGTrainer.Core.ReferenceBookStorage
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Model.ReferenceBook;
+    using ReferenceBookReaders;
 
     /// <summary>
     /// Хранилище справочника.
     /// </summary>
     public class ReferenceBookStorage : IReferenceBookStorage
     {
-        #region Private fields
+        /// <summary>
+        /// Ридер справочника.
+        /// </summary>
+        private readonly IReferenceBookReader _referenceBookReader;
 
         /// <summary>
-        /// Коллекция корневых разделов справочника.
+        /// Развернутое дерево 
         /// </summary>
-        private IEnumerable<ReferenceBookPart> _rootReferenceBookParts;
-
-        #endregion
+        private readonly List<ReferenceBookPart> _expandedTree;
 
         /// <summary>
         /// Инициализирует новый экземпляр <see cref="ReferenceBookStorage"/>
         /// </summary>
-        public ReferenceBookStorage()
+        /// <param name="referenceBookReader">Ридер справочника.</param>
+        public ReferenceBookStorage(IReferenceBookReader referenceBookReader)
         {
-            _rootReferenceBookParts = new List<ReferenceBookPart>();
+            _referenceBookReader = referenceBookReader;
+            _expandedTree = new List<ReferenceBookPart>();
         }
+
+        /// <inheritdoc />
+        public IEnumerable<ReferenceBookPart> RootReferenceBookParts { get; private set; }
 
         /// <inheritdoc />
         public void FillStorage()
         {
-            throw new System.NotImplementedException();
+            RootReferenceBookParts = _referenceBookReader.Read();
+            _expandedTree.AddRange(RootReferenceBookParts.ToList());
+            foreach (var part in RootReferenceBookParts)
+                ExpandTree(part.SubParts);
+        }
+
+        /// <inheritdoc />
+        public ReferenceBookPart GetPartById(int id)
+        {
+            return _expandedTree.Find(part => part.Identifier == id);
+        }
+
+        /// <summary>
+        /// Разворачивание дерева справочника.
+        /// </summary>
+        /// <param name="parts">Коллекция разделов.</param>
+        private void ExpandTree(IEnumerable<ReferenceBookPart> parts)
+        {
+            _expandedTree.AddRange(parts);
+            foreach (var part in parts)
+                ExpandTree(part.SubParts);
         }
     }
 }
