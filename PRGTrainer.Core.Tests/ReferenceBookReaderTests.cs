@@ -70,8 +70,7 @@
         public void EmptyPartTest()
         {
             CopyTargetBase(@"EmptyPart");
-            var referenceBook = _reader.Read().ToList();
-            Assert.Throws(typeof(XmlSchemaException), () => referenceBook[0].SubParts.ToList());
+            Assert.Throws(typeof(XmlSchemaException), () => _reader.Read().ToList());
         }
 
         [Test, Description(@"Атрибут Name отсутствует.")]
