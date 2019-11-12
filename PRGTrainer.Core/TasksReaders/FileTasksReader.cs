@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Xml.Linq;
     using System.Xml.Schema;
-    using Model;
+    using Model.Test;
 
     /// <summary>
     /// Ридер задач из файла.

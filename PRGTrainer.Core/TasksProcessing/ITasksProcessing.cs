@@ -1,6 +1,6 @@
 ﻿namespace PRGTrainer.Core.TasksProcessing
 {
-    using Model;
+    using Model.Test;
 
     /// <summary>
     /// Интерфейс обработчика задач.

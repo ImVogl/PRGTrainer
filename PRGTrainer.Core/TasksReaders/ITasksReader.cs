@@ -1,7 +1,7 @@
 ﻿namespace PRGTrainer.Core.TasksReaders
 {
     using System.Collections.Generic;
-    using Model;
+    using Model.Test;
 
     /// <summary>
     /// Интерфейс ридера задач для членов комиссии с правом решающего голоса.

@@ -1,4 +1,4 @@
-﻿namespace PRGTrainer.Core.Model
+﻿namespace PRGTrainer.Core.Model.Test
 {
     using System.Collections.Generic;
 

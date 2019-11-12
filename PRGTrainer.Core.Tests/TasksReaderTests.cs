@@ -3,7 +3,7 @@
     using System.IO;
     using System.Linq;
     using System.Xml.Schema;
-    using Model;
+    using Model.Test;
     using NUnit.Framework;
     using TasksReaders;
 

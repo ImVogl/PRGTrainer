@@ -2,14 +2,16 @@
 {
     using System.Configuration;
     using Autofac;
+    using ReferenceBookReaders;
+    using ReferenceBookStorage;
     using StatisticsCollector;
     using TasksProcessing;
     using TasksReaders;
     using TasksStorage;
     using Telegram.Bot;
     using TelegramHandler;
+    using TelegramHandler.MessageProcessing;
     using TelegramHandler.StatesController;
-    using TelegramHandler.TestAnswerProcessing;
 
     /// <summary>
     /// Регистрация классов.
@@ -28,8 +30,16 @@
                 .As<ITasksReader>()
                 .SingleInstance();
 
+            builder.RegisterType<FileReferenceBookReader>()
+                .As<IReferenceBookReader>()
+                .SingleInstance();
+
             builder.RegisterType<TasksStorage.TasksStorage>()
                 .As<ITasksStorage>()
+                .SingleInstance();
+
+            builder.RegisterType<ReferenceBookStorage.ReferenceBookStorage>()
+                .As<IReferenceBookStorage>()
                 .SingleInstance();
 
             builder.RegisterType<StatisticsCollector.StatisticsCollector>()
@@ -49,7 +59,11 @@
             builder.RegisterType<TestAnswerProcessing>()
                 .As<IMessageProcessing>()
                 .SingleInstance();
-            
+
+            builder.RegisterType<ReferenceBookProcessing>()
+                .As<IMessageProcessing>()
+                .SingleInstance();
+
             builder.RegisterType<TelegramHandler.TelegramHandler>()
                 .As<ITelegramHandler>()
                 .SingleInstance();
