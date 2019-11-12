@@ -5,6 +5,7 @@
     using System.Threading;
     using JetBrains.Annotations;
     using MessageProcessing;
+    using ReferenceBookStorage;
     using TasksStorage;
     using Telegram.Bot;
 
@@ -26,6 +27,11 @@
         private readonly ITasksStorage _tasksStorage;
 
         /// <summary>
+        /// Хранилище справочника.
+        /// </summary>
+        private readonly IReferenceBookStorage _referenceBookStorage;
+
+        /// <summary>
         /// Обработчики текстовых сообщений.
         /// </summary>
         private readonly IEnumerable<IMessageProcessing> _messageProcessors;
@@ -36,12 +42,15 @@
         /// Конструктор.
         /// </summary>
         /// <param name="tasksStorage">Хранилище задач.</param>
+        /// <param name="referenceBookStorage">Хранилище справочника.</param>
         /// <param name="messageProcessors">Обработчики текстовых сообщений.</param>
         /// <param name="telegramBotClient">Клиент telegram.</param>
-        public TelegramHandler(ITasksStorage tasksStorage, IEnumerable<IMessageProcessing> messageProcessors, [NotNull] ITelegramBotClient telegramBotClient)
+        public TelegramHandler(ITasksStorage tasksStorage, IReferenceBookStorage referenceBookStorage,
+            IEnumerable<IMessageProcessing> messageProcessors, [NotNull] ITelegramBotClient telegramBotClient)
         {
             _telegramBotClient = telegramBotClient;
             _tasksStorage = tasksStorage;
+            _referenceBookStorage = referenceBookStorage;
             _messageProcessors = messageProcessors;
         }
         
@@ -49,6 +58,7 @@
         public void InitialiseSession()
         {
             _tasksStorage.FillStorage();
+            _referenceBookStorage.FillStorage();
             foreach (var messageProcessor in _messageProcessors)
                 _telegramBotClient.OnMessage += messageProcessor.OnMessage;
 

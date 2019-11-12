@@ -49,7 +49,7 @@
             var doc = XDocument.Load(pathToTasksFile);
             var taskElements = doc.Descendants(PartNode).ToList();
 
-            return taskElements.Select(element => ResolveStructure(element, 0));
+            return taskElements.Select(element => ResolveStructure(element, 0)).ToList();
         }
 
         /// <summary>
@@ -74,7 +74,7 @@
                 Identifier = localIdentifier,
                 Content = node.Element(Content)?.Value,
                 ParentIdentifier = parentIdentifier,
-                SubParts = node.Elements(SubPartNode).Select(element => ResolveStructure(element, localIdentifier))
+                SubParts = node.Elements(SubPartNode).Select(element => ResolveStructure(element, localIdentifier)).ToList()
             };
         }
     }

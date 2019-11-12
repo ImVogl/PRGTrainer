@@ -105,7 +105,7 @@
         {
             var currentUserState = _states.Single(state => state.Id == userId);
             _states.Remove(currentUserState);
-            _telegramBotClient.SendTextMessageAsync(userId, _startMessage, replyMarkup: new ReplyKeyboardRemove());
+            _telegramBotClient.SendTextMessageAsync(userId, _startMessage, replyMarkup: new ForceReplyMarkup() /*new ReplyKeyboardRemove()*/);
         }
 
         #endregion

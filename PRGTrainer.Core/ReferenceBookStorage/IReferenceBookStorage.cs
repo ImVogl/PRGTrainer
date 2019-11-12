@@ -9,9 +9,9 @@
     public interface IReferenceBookStorage
     {
         /// <summary>
-        /// Получает коллекцию корневых разделов справочника.
+        /// Получает корневой раздел справочника.
         /// </summary>
-        IEnumerable<ReferenceBookPart> RootReferenceBookParts { get; }
+        ReferenceBookPart RootReferenceBookParts { get; }
 
         /// <summary>
         /// Заполнение хранилища.

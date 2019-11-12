@@ -31,21 +31,23 @@
         }
 
         /// <inheritdoc />
-        public IEnumerable<ReferenceBookPart> RootReferenceBookParts { get; private set; }
+        public ReferenceBookPart RootReferenceBookParts { get; private set; }
 
         /// <inheritdoc />
         public void FillStorage()
         {
-            RootReferenceBookParts = _referenceBookReader.Read();
-            _expandedTree.AddRange(RootReferenceBookParts.ToList());
-            foreach (var part in RootReferenceBookParts)
+            var referenceBook = _referenceBookReader.Read().ToList();
+            RootReferenceBookParts = new ReferenceBookPart { SubParts = referenceBook, Identifier = 0, Name = @"Справочник", ParentIdentifier = -1 };
+
+            _expandedTree.AddRange(referenceBook);
+            foreach (var part in referenceBook)
                 ExpandTree(part.SubParts);
         }
 
         /// <inheritdoc />
         public ReferenceBookPart GetPartById(int id)
         {
-            return _expandedTree.Find(part => part.Identifier == id);
+            return id == 0 ? RootReferenceBookParts : _expandedTree.First(part => part.Identifier == id);
         }
 
         /// <summary>
