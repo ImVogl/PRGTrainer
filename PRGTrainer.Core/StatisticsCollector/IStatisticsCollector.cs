@@ -9,7 +9,7 @@
     public interface IStatisticsCollector
     {
         /// <summary>
-        /// Сохраняет вопросы, на которые пользователь ответил успешно.
+        /// Сохраняет вопросы, на которые пользователь ответил неверно.
         /// </summary>
         /// <param name="questions"></param>
         void SaveResult([NotNull] IEnumerable<string> questions);

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using log4net;
 
     /// <summary>
     /// Сборщик статистики.
@@ -34,7 +35,13 @@
         public StatisticsCollector()
         {
             _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings[@"UserStatistics"].ConnectionString;
+            Logger = LogManager.GetLogger(typeof(StatisticsCollector));
         }
+
+        /// <summary>
+        /// Логгер.
+        /// </summary>
+        private ILog Logger { get; }
         
         /// <inheritdoc />
         public async void SaveResult(IEnumerable<string> questions)
@@ -60,10 +67,11 @@ END{2}{2}", QuestionResultTable, question, Environment.NewLine);
                     await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Console.WriteLine(e);
-                throw;
+                Console.WriteLine(exception);
+                if(Logger.IsErrorEnabled)
+                    Logger.Error(@"Не удалось записать вопросы, на которые был дал неверный ответ!", exception);
             }
             finally
             {
@@ -74,11 +82,9 @@ END{2}{2}", QuestionResultTable, question, Environment.NewLine);
         /// <inheritdoc />
         public async void SaveUserResult(int id, string user, int successRate)
         {
-
             var connection = new SqlConnection(_connectionString);
             try
             {
-
                 await connection.OpenAsync().ConfigureAwait(false);
                 var query = string.IsNullOrWhiteSpace(user)
                     ? $"INSERT INTO dbo.{UserResultTable} (identifier, result, finishtime) VALUES ({id}, {successRate}, {GetDataTime()});"
@@ -89,10 +95,11 @@ END{2}{2}", QuestionResultTable, question, Environment.NewLine);
                     await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Console.WriteLine(e);
-                throw;
+                Console.WriteLine(exception);
+                if (Logger.IsErrorEnabled)
+                    Logger.Error(@"Не удалось записать результат пользователя!", exception);
             }
             finally
             {

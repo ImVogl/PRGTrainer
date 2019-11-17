@@ -234,7 +234,7 @@
 
             var message = string.Format(@"Вопрос {0}/{1}: {2}{3}{3}{4}",
                 _subStates[id].CurrentTaskNum + 1,
-                _subStates[id].TasksInfos.Count + 1,
+                _subStates[id].TasksInfos.Count,
                 _subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Question,
                 Environment.NewLine,
                 string.Join(Environment.NewLine, questions));
@@ -278,7 +278,7 @@
         {
             var result = new List<string>();
             for (var i = 0; i < _subStates[id].TasksInfos.Count; i++)
-                if (_subStates[id].Results[i])
+                if (!_subStates[id].Results[i])
                     result.Add(_subStates[id].TasksInfos[i].Question);
 
             _statisticsCollector.SaveResult(result);
