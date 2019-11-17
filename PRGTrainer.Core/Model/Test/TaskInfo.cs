@@ -15,7 +15,7 @@
         /// <summary>
         /// Получает или задает коллекцию вариантов ответа.
         /// </summary>
-        public IEnumerable<string> Options { get; set; }
+        public List<string> Options { get; set; }
 
         /// <summary>
         /// Получает или задает номер корректного ответа.

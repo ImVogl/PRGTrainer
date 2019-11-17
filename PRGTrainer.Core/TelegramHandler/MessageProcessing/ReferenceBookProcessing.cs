@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Model.ReferenceBook;
     using ReferenceBookStorage;
     using StatesController;
@@ -60,7 +61,7 @@
         }
 
         /// <inheritdoc />
-        public void OnMessage(object sender, MessageEventArgs eventArgs)
+        public async void OnMessage(object sender, MessageEventArgs eventArgs)
         {
             var message = eventArgs.Message;
             if (message == null || message.Type != MessageType.Text)
@@ -72,11 +73,11 @@
             if (message.Text == _testStateController.FinishCommand)
             {
                 _refDeepLevels.Remove(message.From.Id);
-                _testStateController.ResetState(message.From.Id);
+                await _testStateController.ResetState(message.From.Id).ConfigureAwait(false);
                 return;
             }
 
-            ProcessMessage(message.From.Id, message.Text);
+            await ProcessMessage(message.From.Id, message.Text).ConfigureAwait(false);
         }
 
         #region Private region
@@ -86,7 +87,7 @@
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="command">Команда.</param>
-        private void ProcessMessage(int id, string command)
+        private async Task ProcessMessage(int id, string command)
         {
             if (!_refDeepLevels.ContainsKey(id))
                 _refDeepLevels[id] = _referenceBookStorage.RootReferenceBookParts;
@@ -97,18 +98,18 @@
             if (_refDeepLevels[id].SubParts != null && _refDeepLevels[id].SubParts.Any(part => part.Name == command))
                 _refDeepLevels[id] = _refDeepLevels[id].SubParts.First(part => part.Name == command);
 
-            SendParts(id);
+            await SendParts(id).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Отправляет раздел справочника.
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
-        private void SendParts(int id)
+        private async Task SendParts(int id)
         {
             var message = _refDeepLevels[id].Content ?? _refDeepLevels[id].Name;
             var keyboard = CreateButtons(_refDeepLevels[id]);
-            _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard);
+            await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard).ConfigureAwait(false);
         }
 
         /// <summary>

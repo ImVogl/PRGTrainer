@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using JetBrains.Annotations;
+    using log4net.Config;
     using MessageProcessing;
     using ReferenceBookStorage;
     using TasksStorage;
@@ -57,6 +58,7 @@
         /// <inheritdoc />
         public void InitialiseSession()
         {
+            XmlConfigurator.Configure();
             _tasksStorage.FillStorage();
             _referenceBookStorage.FillStorage();
             foreach (var messageProcessor in _messageProcessors)
