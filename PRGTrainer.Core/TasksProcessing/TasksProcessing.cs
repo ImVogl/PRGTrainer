@@ -1,6 +1,7 @@
 ﻿namespace PRGTrainer.Core.TasksProcessing
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Model.Test;
 
@@ -25,8 +26,8 @@
             };
 
             var correctAnswer = task.Options.ToList()[task.CorrectOptionNum];
-            newTask.Options = task.Options.OrderBy(item => _random.Next());
-            newTask.CorrectOptionNum = task.Options.ToList().IndexOf(correctAnswer);
+            newTask.Options = new List<string>(task.Options.OrderBy(item => _random.Next()));
+            newTask.CorrectOptionNum = newTask.Options.IndexOf(correctAnswer);
             return newTask;
         }
 

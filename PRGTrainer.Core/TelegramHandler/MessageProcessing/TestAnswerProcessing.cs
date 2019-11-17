@@ -156,8 +156,8 @@
 
             if (AnswerCommands.Contains(command) && _subStates[id].SubState == StateTest)
             {
-                _subStates[id].CurrentTaskNum += 1;
                 ProcessAnswer(id, user, command);
+                _subStates[id].CurrentTaskNum += 1;
                 SendQuestion(id);
             }
 
@@ -226,10 +226,13 @@
         /// <param name="id">Идентификатор пользователя.</param>
         private void SendQuestion(int id)
         {
+            if (_subStates[id].CurrentTaskNum == _subStates[id].TasksInfos.Count)
+                return;
+
             var questions = AnswerCommands.Zip(_subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Options,
                 (intro, question) => intro + ": " + question + Environment.NewLine);
 
-            var message = string.Format(@"Вопрос {0}/{1}: {2}{3}{4}",
+            var message = string.Format(@"Вопрос {0}/{1}: {2}{3}{3}{4}",
                 _subStates[id].CurrentTaskNum + 1,
                 _subStates[id].TasksInfos.Count + 1,
                 _subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Question,
@@ -258,7 +261,7 @@
 
             _telegramBotClient.SendTextMessageAsync(id, message);
 
-            if (_subStates[id].CurrentTaskNum == _subStates[id].TasksInfos.Count)
+            if (_subStates[id].CurrentTaskNum + 1 == _subStates[id].TasksInfos.Count)
             {
                 _testStateController.ResetState(id);
                 SaveStatistic(id, user);
@@ -280,7 +283,7 @@
 
             _statisticsCollector.SaveResult(result);
             var successRate = 100 * _subStates[id].Results.Count(c => c) / _subStates[id].Results.Count;
-            _statisticsCollector.SaveUserResult(user, successRate);
+            _statisticsCollector.SaveUserResult(id, user, successRate);
         }
 
         /// <summary>

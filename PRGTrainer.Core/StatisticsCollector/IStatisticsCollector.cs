@@ -17,8 +17,9 @@
         /// <summary>
         /// Сохраняет результат пользователя. 
         /// </summary>
+        /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="successRate">Доля успешных ответов.</param>
-        void SaveUserResult([NotNull] string user, [NotNull] int successRate);
+        void SaveUserResult([NotNull] int id, [CanBeNull] string user, [NotNull] int successRate);
     }
 }
