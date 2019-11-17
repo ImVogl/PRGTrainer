@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
     using JetBrains.Annotations;
     using log4net.Config;
     using MessageProcessing;
@@ -37,6 +38,11 @@
         /// </summary>
         private readonly IEnumerable<IMessageProcessing> _messageProcessors;
 
+        /// <summary>
+        /// Токен отмены бесконечной операции.
+        /// </summary>
+        private readonly CancellationTokenSource _cancellationToken;
+
         #endregion
 
         /// <summary>
@@ -53,6 +59,7 @@
             _tasksStorage = tasksStorage;
             _referenceBookStorage = referenceBookStorage;
             _messageProcessors = messageProcessors;
+            _cancellationToken = new CancellationTokenSource();
         }
         
         /// <inheritdoc />
@@ -67,13 +74,14 @@
             _telegramBotClient.Timeout = new TimeSpan(0, 20, 0);
             _telegramBotClient.StartReceiving();
 
-            Thread.Sleep(Timeout.Infinite);
+            Task.Run(async () => await Task.Delay(Timeout.Infinite, _cancellationToken.Token).ConfigureAwait(false));
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             _telegramBotClient.StopReceiving();
+            _cancellationToken.Cancel();
         }
 
     }
