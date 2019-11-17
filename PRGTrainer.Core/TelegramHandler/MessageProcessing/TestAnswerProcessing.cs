@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Model.Test;
     using StatesController;
     using StatisticsCollector;
@@ -116,7 +117,7 @@
         }
 
         /// <inheritdoc />
-        public void OnMessage(object sender, MessageEventArgs eventArgs)
+        public async void OnMessage(object sender, MessageEventArgs eventArgs)
         {
             var message = eventArgs.Message;
             if (message == null || message.Type != MessageType.Text)
@@ -128,11 +129,11 @@
             if (message.Text == _testStateController.FinishCommand)
             {
                 _subStates.Remove(message.From.Id);
-                _testStateController.ResetState(message.From.Id);
+                await _testStateController.ResetState(message.From.Id).ConfigureAwait(false);
                 return;
             }
 
-            ProcessMessage(message.From.Id, message.From.Username, message.Text);
+            await ProcessMessage(message.From.Id, message.From.Username, message.Text).ConfigureAwait(false);
         }
 
         #region Private methods
@@ -143,37 +144,41 @@
         /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="command">Команда.</param>
-        private void ProcessMessage(int id, string user, string command)
+        private async Task ProcessMessage(int id, string user, string command)
         {
             if ((!_subStates.ContainsKey(id) || _subStates[id].SubState == StateChoice) && ChoiceCommands.Contains(command))
             {
                 SetQuestions(id, user, command);
                 _subStates[id].SubState = StateTest;
                 _subStates[id].CurrentTaskNum = 0;
-                SendQuestion(id);
+                await SendQuestion(id).ConfigureAwait(false);
                 return;
             }
 
             if (AnswerCommands.Contains(command) && _subStates[id].SubState == StateTest)
             {
-                ProcessAnswer(id, user, command);
-                _subStates[id].CurrentTaskNum += 1;
-                SendQuestion(id);
+                var answerTask = Task.Run( async () => await ProcessAnswer(id, user, command).ConfigureAwait(false));
+                await answerTask.ContinueWith(async c =>
+                {
+                    _subStates[id].CurrentTaskNum++;
+                    await SendQuestion(id).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+                
             }
 
             if (command == _testStateController.NewTestCommand)
-                StartTest(id);
+                await StartTest(id).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Начало тестирования.
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
-        private void StartTest(int id)
+        private async Task StartTest(int id)
         {
             const string message = @"Выберете вариант тестов.";
             var keyboard = new ReplyKeyboardMarkup(CreateStartTestButtons());
-            _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard);
+            await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -224,7 +229,7 @@
         /// Отправляет вопрос пользователю.
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
-        private void SendQuestion(int id)
+        private async Task SendQuestion(int id)
         {
             if (_subStates[id].CurrentTaskNum == _subStates[id].TasksInfos.Count)
                 return;
@@ -240,7 +245,7 @@
                 string.Join(Environment.NewLine, questions));
 
             var keyboard = new ReplyKeyboardMarkup(CreateTestButtons());
-            _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard);
+            await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -249,7 +254,7 @@
         /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="answer">Ответ пользователя.</param>
-        private void ProcessAnswer(int id, string user, string answer)
+        private async Task ProcessAnswer(int id, string user, string answer)
         {
             
             var isAnswerCorrect = _tasksProcessing.IsAnswerCorrect(_subStates[id].TasksInfos[_subStates[id].CurrentTaskNum], AnswerCommands.IndexOf(answer));
@@ -259,13 +264,13 @@
                 : string.Format(@"Неверно!{0}Объяснение: {0}{1}{0}", Environment.NewLine,
                     _subStates[id].TasksInfos[_subStates[id].CurrentTaskNum].Explanation);
 
-            _telegramBotClient.SendTextMessageAsync(id, message);
+            await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
 
             if (_subStates[id].CurrentTaskNum + 1 == _subStates[id].TasksInfos.Count)
             {
-                _testStateController.ResetState(id);
-                SaveStatistic(id, user);
-                SendResult(id);
+                await SaveStatistic(id, user).ConfigureAwait(false);
+                await SendResult(id).ConfigureAwait(false);
+                await _testStateController.ResetState(id).ConfigureAwait(false);
             }
         }
 
@@ -274,26 +279,26 @@
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Пользователь.</param>
-        private void SaveStatistic(int id, string user)
+        private async Task SaveStatistic(int id, string user)
         {
             var result = new List<string>();
             for (var i = 0; i < _subStates[id].TasksInfos.Count; i++)
                 if (!_subStates[id].Results[i])
                     result.Add(_subStates[id].TasksInfos[i].Question);
 
-            _statisticsCollector.SaveResult(result);
+            await _statisticsCollector.SaveResult(result).ConfigureAwait(false);
             var successRate = 100 * _subStates[id].Results.Count(c => c) / _subStates[id].Results.Count;
-            _statisticsCollector.SaveUserResult(id, user, successRate);
+            await _statisticsCollector.SaveUserResult(id, user, successRate).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Отправляет результаты прохождения теста пользователю.
         /// </summary>
         /// <param name="id">Идентификатор пользователя.</param>
-        private void SendResult(int id)
+        private async Task SendResult(int id)
         {
             var message = string.Format(@"Ваш результат: {0:N2}%", 100 * _subStates[id].Results.Count(c => c) / _subStates[id].Results.Count);
-            _telegramBotClient.SendTextMessageAsync(id, message);
+            await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
         }
 
         /// <summary>

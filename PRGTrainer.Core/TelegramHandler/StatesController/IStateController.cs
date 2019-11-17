@@ -1,5 +1,7 @@
 ﻿namespace PRGTrainer.Core.TelegramHandler.StatesController
 {
+    using System.Threading.Tasks;
+
     /// <summary>
     /// Интерфейс контроллера состояний.
     /// </summary>
@@ -14,6 +16,6 @@
         /// Сброс состояния.
         /// </summary>
         /// <param name="userId">Идентификатор пользователя.</param>
-        void ResetState(int userId);
+        Task ResetState(int userId);
     }
 }

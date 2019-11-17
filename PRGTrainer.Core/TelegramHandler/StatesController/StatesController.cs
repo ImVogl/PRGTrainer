@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using System.Threading.Tasks;
     using MessageProcessing;
     using Model;
     using Telegram.Bot;
@@ -88,24 +89,24 @@
         }
 
         /// <inheritdoc />
-        public void OnMessage(object sender, MessageEventArgs eventArgs)
+        public async void OnMessage(object sender, MessageEventArgs eventArgs)
         {
             var message = eventArgs.Message;
             if (message == null || message.Type != MessageType.Text)
                 return;
 
             if (_states.All(state => state.Id != message.From.Id))
-                NewUserProcess(message.From.Id, message.From.Username, message.Text);
+                await NewUserProcess(message.From.Id, message.From.Username, message.Text).ConfigureAwait(false);
             else
                 CheckTimeOut(message.From.Id);
         }
 
         /// <inheritdoc />
-        public void ResetState(int userId)
+        public async Task ResetState(int userId)
         {
             var currentUserState = _states.Single(state => state.Id == userId);
             _states.Remove(currentUserState);
-            _telegramBotClient.SendTextMessageAsync(userId, _startMessage, replyMarkup: new ForceReplyMarkup() /*new ReplyKeyboardRemove()*/);
+            await _telegramBotClient.SendTextMessageAsync(userId, _startMessage, replyMarkup: new ForceReplyMarkup()).ConfigureAwait(false);
         }
 
         #endregion
@@ -137,7 +138,7 @@
         /// <param name="id">Идентификатор пользователя.</param>
         /// <param name="user">Имя пользователя.</param>
         /// <param name="text">Текст сообщения пользователя.</param>
-        private async void NewUserProcess(int id, string user, string text)
+        private async Task NewUserProcess(int id, string user, string text)
         {
             switch (text)
             {
@@ -156,7 +157,7 @@
                 default:
                 {
                    await _telegramBotClient.SendTextMessageAsync(id, _startMessage).ConfigureAwait(false);
-                    break;
+                   break;
                 }
             }
         }

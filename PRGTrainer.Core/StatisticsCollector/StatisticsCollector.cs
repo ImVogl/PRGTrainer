@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using System.Threading.Tasks;
     using log4net;
 
     /// <summary>
@@ -44,7 +45,7 @@
         private ILog Logger { get; }
         
         /// <inheritdoc />
-        public async void SaveResult(IEnumerable<string> questions)
+        public async Task SaveResult(IEnumerable<string> questions)
         {
             var query = "DECLARE @val int;\n\r";
             foreach (var question in questions)
@@ -80,7 +81,7 @@ END{2}{2}", QuestionResultTable, question, Environment.NewLine);
         }
 
         /// <inheritdoc />
-        public async void SaveUserResult(int id, string user, int successRate)
+        public async Task SaveUserResult(int id, string user, int successRate)
         {
             var connection = new SqlConnection(_connectionString);
             try
