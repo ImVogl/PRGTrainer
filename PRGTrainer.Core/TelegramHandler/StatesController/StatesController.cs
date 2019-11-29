@@ -15,7 +15,7 @@
     /// <summary>
     /// Контроллер состояний пользователей.
     /// </summary>
-    public class StatesController : ITestStateController, IReferenceBookStateController, IMessageProcessing
+    public class StatesController : ITestStateController, IReferenceBookStateController, IAdminController, IMessageProcessing
     {
         #region Private fields
 
@@ -28,6 +28,11 @@
         /// Текст сообщения команды доступа к справочным материалам.
         /// </summary>
         private const string OpenRefBook = "/refbook";
+
+        /// <summary>
+        /// Текст сообщения команды администрирования.
+        /// </summary>
+        private const string Administrative = @"/admin";
 
         /// <summary>
         /// Коллекция состояний пользователей.
@@ -86,6 +91,12 @@
         public bool IsUserUsingRefBook(int identifier)
         {
             return _states.Any(state => state.Id == identifier && state.State == UserStates.UsingRefBook);
+        }
+
+        /// <inheritdoc />
+        public bool IsUserUsingAdministrative(int identifier)
+        {
+            return _states.Any(state => state.Id == identifier && state.State == UserStates.UsingAdministrative);
         }
 
         /// <inheritdoc />
@@ -151,6 +162,12 @@
                 case OpenRefBook:
                 {
                     _states.Add(new UserState { Id = id, User = user, State = UserStates.UsingRefBook, LastUpdateTime = DateTime.Now });
+                    break;
+                }
+
+                case Administrative:
+                {
+                    _states.Add(new UserState { Id = id, User = user, State = UserStates.UsingAdministrative, LastUpdateTime = DateTime.Now });
                     break;
                 }
 

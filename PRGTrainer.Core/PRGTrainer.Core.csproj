@@ -63,7 +63,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminHandler\AdminHandler.cs" />
+    <Compile Include="AdminHandler\IAdminHandler.cs" />
+    <Compile Include="AdminHandler\StatisticOutputFileType.cs" />
     <Compile Include="Model\ReferenceBook\ReferenceBookPart.cs" />
+    <Compile Include="Model\Result\QuestionResult.cs" />
+    <Compile Include="Model\Result\UserResult.cs" />
     <Compile Include="Model\Test\Answer.cs" />
     <Compile Include="Model\Test\MemberType.cs" />
     <Compile Include="Model\Test\TaskInfo.cs" />
@@ -74,7 +79,13 @@
     <Compile Include="ReferenceBookReaders\IReferenceBookReader.cs" />
     <Compile Include="ReferenceBookStorage\IReferenceBookStorage.cs" />
     <Compile Include="ReferenceBookStorage\ReferenceBookStorage.cs" />
+    <Compile Include="ResultFileGenerator\IResultFileGenerator.cs" />
+    <Compile Include="ResultFileGenerator\ResultFileGenerator.cs" />
+    <Compile Include="TelegramHandler\Help\ParsingArguments\ArgumentParser.cs" />
+    <Compile Include="TelegramHandler\Help\ParsingArguments\IArgumentParser.cs" />
+    <Compile Include="TelegramHandler\MessageProcessing\AdminProcessing.cs" />
     <Compile Include="TelegramHandler\MessageProcessing\ReferenceBookProcessing.cs" />
+    <Compile Include="TelegramHandler\StatesController\IAdminController.cs" />
     <Compile Include="TrainerModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StatisticsCollector\IStatisticsCollector.cs" />

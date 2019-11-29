@@ -13,6 +13,11 @@
         /// <summary>
         /// Пользователь использует справочные материалы.
         /// </summary>
-        UsingRefBook
+        UsingRefBook,
+
+        /// <summary>
+        /// Пользователь занимается администрированием.
+        /// </summary>
+        UsingAdministrative
     }
 }

@@ -66,8 +66,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Help\ArgumentParserTests.cs" />
     <Compile Include="ReferenceBookReaderTests.cs" />
     <Compile Include="ReferenceBookStorageTests.cs" />
+    <Compile Include="ResultFileGeneratorTests.cs" />
     <Compile Include="TasksProcessingTests.cs" />
     <Compile Include="TasksReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
