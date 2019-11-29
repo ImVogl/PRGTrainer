@@ -10,21 +10,28 @@
         private static readonly IArgumentParser ArgumentParser = new ArgumentParser();
 
         [Test, Description(@"Отсутствует нужный аргумент.")]
-        public void NoTargetParam()
+        public void NoTargetParamTest()
         {
             const string command = @"/aRg:value";
             Assert.That(ArgumentParser.Parse(command, @"/test"), Is.Empty);
         }
 
         [Test, Description(@"Получение аргумента.")]
-        public void TargetArgument()
+        public void TargetArgumentTest()
         {
             const string command = @"/first:first /aRg:vaLue, date /second:secondValue";
             Assert.That(ArgumentParser.Parse(command, @"/arg:"), Is.EqualTo(@"value, date"));
         }
 
+        [Test, Description(@"Получение значение аргумента при наличие двух одинаковых аргументов.")]
+        public void GetDoubleParamTest()
+        {
+            const string command = @"/aRg:vaLue /first:first /aRg:vaLue, date /second:secondValue";
+            Assert.That(ArgumentParser.Parse(command, @"/arg:"), Is.EqualTo(@"value, date"));
+        }
+
         [Test, Description(@"Получение коллекции значений из аргумента.")]
-        public void GetCollection()
+        public void GetCollectionTest()
         {
             const string command = @"/first:first /aRg:vaLue, date /second:secondValue";
 

@@ -122,7 +122,7 @@
                 await ProcessMessage(message.From.Id, message.Text).ConfigureAwait(false);
         }
 
-        #region Private fields
+        #region Private methods
 
         /// <summary>
         /// Обработка команд.
