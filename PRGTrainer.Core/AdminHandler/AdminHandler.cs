@@ -3,9 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using System.Linq;
     using System.Threading.Tasks;
     using JetBrains.Annotations;
     using log4net;
+    using Model.Result;
     using ResultFileGenerator;
 
     /// <summary>
@@ -24,6 +26,16 @@
         /// Таблица с токенами.
         /// </summary>
         private const string TokensTable = @"Tokens";
+
+        /// <summary>
+        /// Таблица с результатами пользователя.
+        /// </summary>
+        private const string UserResultsTable = @"UserResults";
+
+        /// <summary>
+        /// Таблица со счетчиком неверных ответов на вопросы.
+        /// </summary>
+        private const string QuestionResultsTable = @"QuestionResults";
 
         /// <summary>
         /// Генератор результатов пользователей.
@@ -94,11 +106,51 @@
         /// <inheritdoc />
         public async Task<string> GetStatisticForUsers(ICollection<string> users, DateTime startDate, int identifier)
         {
-            if (OutputFileType.Equals(StatisticOutputFileType.Image))
-            { }
+            if (!await IsUserAdmin(identifier))
+                return string.Empty;
 
-            if(OutputFileType.Equals(StatisticOutputFileType.Text))
-            { }
+            var results = new List<UserResult>();
+            var query = $"SELECT username, result, finishtime FROM {UserResultsTable} WHERE username IS NOT NULL";
+            if (users != null)
+                query = users.Aggregate(query, (current, user) => current + $" OR username = '{user}'");
+
+            query += @";";
+            try
+            {
+                await _connection.OpenAsync().ConfigureAwait(false);
+                using (var command = new SqlCommand(query, _connection))
+                {
+                    var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        var user = reader.GetString(0);
+                        var result = reader.GetInt32(1);
+                        var date = reader.GetDateTime(2);
+                        if (results.Any(item => item.User == user))
+                            results[results.FindIndex(item => item.User == user)].Result[date] = result;
+                        else
+                            results.Add(new UserResult { User = user, Result = new Dictionary<DateTime, int> { { date, result } } });
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                if (Logger.IsErrorEnabled)
+                    Logger.Error(@"Не удалось получить результаты пользователей!", exception);
+
+                return string.Empty;
+            }
+            finally
+            {
+                _connection.Close();
+            }
+
+            if (OutputFileType.Equals(StatisticOutputFileType.Image))
+                return _resultFileGenerator.GenerateAsImage(results);
+
+            if (OutputFileType.Equals(StatisticOutputFileType.Text))
+                return _resultFileGenerator.GenerateAsText(results);
             
             throw new ArgumentOutOfRangeException("", OutputFileType, @"Неизвестный тип выходного файла!");
         }
@@ -112,11 +164,41 @@
         /// <inheritdoc />
         public async Task<string> GetStatisticForQuestions(int identifier)
         {
+            if (!await IsUserAdmin(identifier))
+                return string.Empty;
+
+            var questionResult = new List<QuestionResult>();
+            var query = $"SELECT question, wrongcount FROM dbo.{QuestionResultsTable};";
+            try
+            {
+                await _connection.OpenAsync().ConfigureAwait(false);
+                using (var command = new SqlCommand(query, _connection))
+                {
+                    var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+                    while (await reader.ReadAsync().ConfigureAwait(false))
+                        questionResult.Add(new QuestionResult { Question = reader.GetString(0), Quota = reader.GetInt32(1)});
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                if (Logger.IsErrorEnabled)
+                    Logger.Error(@"Не удалось получить результаты пользователей!", exception);
+
+                return string.Empty;
+            }
+            finally
+            {
+                _connection.Close();
+            }
+
+            var sum = questionResult.Aggregate((double)0, (current, item) => current + item.Quota);
+            questionResult.ForEach(item => item.Quota = item.Quota/sum);
             if (OutputFileType.Equals(StatisticOutputFileType.Image))
-            { }
+                return _resultFileGenerator.GenerateAsImage(questionResult);
 
             if (OutputFileType.Equals(StatisticOutputFileType.Text))
-            { }
+                return _resultFileGenerator.GenerateAsText(questionResult);
 
             throw new ArgumentOutOfRangeException("", OutputFileType, @"Неизвестный тип выходного файла!");
         }
