@@ -1,8 +1,9 @@
 /.vs/*
-/packages/*
+/Source/.vs/*
 bin
 *.cache
 *.dll
 *.pdb
 obj
 /DataSet/*
+/Libs/packages/*

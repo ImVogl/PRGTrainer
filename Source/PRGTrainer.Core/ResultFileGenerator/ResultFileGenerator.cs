@@ -59,9 +59,13 @@
 
         #endregion
 
+        /// <summary>
+        /// Создает экземпляр <see cref="ResultFileGenerator"/>
+        /// </summary>
         public ResultFileGenerator()
         {
             _workFolderPath = Path.Combine(Assembly.GetAssembly(typeof(ResultFileGenerator)).Location, @"..\Results");
+            Directory.CreateDirectory(_workFolderPath);
             _random = new Random();
         }
         
@@ -178,16 +182,18 @@
         /// <param name="max">Последняя дата прохождения теста.</param>
         private static void SetLabels(Plot plot, IEnumerable<DateTime> datas, IEnumerable<double> dataY, DateTime min, DateTime max)
         {
+            const int division = 20;
             var datasLoc = datas.ToList();
             var dataX = ConvertDateToDouble(datasLoc, min, max).ToList();
             for (var i = 0; i < datasLoc.Count; i++)
             {
                 var y = dataY.ToList()[i];
                     y = y < (MaxPointY - MinPointY) / 2
-                    ? y + (MaxPointY - MinPointY) / 10
-                    : y - (MaxPointY - MinPointY) / 10;
+                    ? y + (MaxPointY - MinPointY) / division
+                    : y - (MaxPointY - MinPointY) / division;
 
-                plot.PlotText(datasLoc[i].ToString(CultureInfo.InvariantCulture), dataX[i], y, Color.Black);
+                var x = dataX[i] > MaxPointX - 15 ? MaxPointX - 15.0 : dataX[i];
+                plot.PlotText(datasLoc[i].ToString("d"), x, y, Color.Black);
             }
         }
     }
