@@ -1,0 +1,23 @@
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <LibsDir>$(SolutionDir)\..\Libs</LibsDir>
+    <NuGetDir>$(SolutionDir)\..\Libs\packages</NuGetDir>
+    <BuildDir>$(SolutionDir)\..\Build</BuildDir>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <NetFrameworkVersion>net45</NetFrameworkVersion>
+  </PropertyGroup>
+  <!-- we need double IntDir definition (see end of this file), else we will have tlog-file intermediate directory in x64 directory !-->
+  <PropertyGroup>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+</Project>

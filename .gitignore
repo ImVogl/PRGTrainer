@@ -7,3 +7,6 @@ bin
 obj
 /DataSet/*
 /Libs/packages/*
+/Source/**/Debug/**/*
+/Source/**/Release/**/*
+/Build/*
