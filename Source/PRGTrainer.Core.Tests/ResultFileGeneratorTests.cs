@@ -14,14 +14,6 @@
         private static readonly string WorkFolder = Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestItems", @"ResultFileGenerator");
         private readonly IResultFileGenerator _resultFileGenerator = new ResultFileGenerator();
 
-        [TearDown]
-        public void TearDown()
-        {
-            var files = Directory.GetFiles(WorkFolder, @"*", SearchOption.TopDirectoryOnly);
-            foreach (var file in files)
-                File.Delete(file);
-        }
-
         [Test, Description(@"Получение результатов по пользователям.")]
         public void GenerateTxtResultUserTest()
         {
@@ -48,10 +40,13 @@
             };
 
             var path = _resultFileGenerator.GenerateAsImage(userResults);
-            var content = Image.FromFile(path);
-            var expectedContent = Image.FromFile(Path.Combine(WorkFolder, @"UsersResult.png"));
+            var content = new Bitmap(path);
+            var expectedContent = new Bitmap(Path.Combine(WorkFolder, @"UsersResult.png"));
 
-            Assert.That(content, Is.EqualTo(expectedContent));
+            Assert.That(CompareImages(content, expectedContent), Is.True);
+
+            expectedContent.Dispose();
+            content.Dispose();
         }
 
         [Test, Description(@"Получение результатов по вопросам.")]
@@ -72,9 +67,52 @@
             Assert.That(content, Is.EqualTo(expectedContent));
         }
 
-        private bool AreImagesSame(string firstPath, string secondPath)
+        [Test, Description(@"Получение результатов по вопросам в виде изображения.")]
+        public void GenerateImgResultQuestionTest()
         {
-            //
+            var questionResults = new List<QuestionResult>
+            {
+                new QuestionResult { Quota = 0.3, Question = @"Вопрос 1" },
+                new QuestionResult { Quota = 0.4, Question = @"Вопрос 2" },
+                new QuestionResult { Quota = 0.2, Question = @"Вопрос 3" },
+                new QuestionResult { Quota = 0.1, Question = @"Вопрос 4" }
+            };
+
+            var path = _resultFileGenerator.GenerateAsImage(questionResults);
+            var content = new Bitmap(path);
+            var expectedContent = new Bitmap(Path.Combine(WorkFolder, @"QuestionResult.png"));
+
+            Assert.That(CompareImages(content, expectedContent), Is.True);
+
+            expectedContent.Dispose();
+            content.Dispose();
+        }
+
+        public static bool CompareImages(Bitmap image1, Bitmap image2)
+        {
+            var flag = true;
+            var width = Math.Min(image1.Width, image2.Width);
+            var height = Math.Min(image1.Height, image2.Height);
+            var bitmap = new Bitmap(width, height);
+            var white = Color.White;
+            var red = Color.Red;
+            for (var x = 0; x < width; ++x)
+            {
+                for (var y = 0; y < height; ++y)
+                {
+                    if (image1.GetPixel(x, y).Equals((object)image2.GetPixel(x, y)))
+                    {
+                        bitmap.SetPixel(x, y, white);
+                    }
+                    else
+                    {
+                        bitmap.SetPixel(x, y, red);
+                        flag = false;
+                    }
+                }
+            }
+
+            return flag;
         }
     }
 }
