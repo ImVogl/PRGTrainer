@@ -10,3 +10,4 @@ obj
 /Source/**/Debug/**/*
 /Source/**/Release/**/*
 /Build/*
+Info.txt
