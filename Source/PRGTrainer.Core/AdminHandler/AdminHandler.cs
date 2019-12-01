@@ -130,9 +130,10 @@
                 return string.Empty;
 
             var results = new List<UserResult>();
-            var query = $"SELECT username, result, finishtime FROM {UserResultsTable} WHERE username IS NOT NULL";
-            if (users != null)
-                query = users.Aggregate(query, (current, user) => current + $" OR username = '{user}'");
+            var query = $"SELECT username, result, finishtime FROM {UserResultsTable} WHERE (finishtime > convert(datetime,'{startDate:dd-MM-yy}', 5) AND username IS NOT NULL)";
+            if (users != null && users.Any())
+                query += @" AND (" + string.Join(@" OR ", users.Select(user => $"username = '{user}'")) + @")";
+            
 
             query += @";";
             try
