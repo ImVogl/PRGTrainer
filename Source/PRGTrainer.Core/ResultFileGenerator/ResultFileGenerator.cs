@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -20,12 +19,12 @@
         /// <summary>
         /// Ширина графика.
         /// </summary>
-        private const int Width = 640;
+        private const int Width = 1920;
 
         /// <summary>
         /// Высота графика.
         /// </summary>
-        private const int High = 480;
+        private const int High = 1440;
 
         /// <summary>
         /// Значение минимального значения на оси Х.
@@ -46,6 +45,11 @@
         /// Значение максимального значения на оси Y.
         /// </summary>
         private const double MaxPointY = 100;
+
+        /// <summary>
+        /// Размер шрифта.
+        /// </summary>
+        private const float FontSize = 10;
 
         /// <summary>
         /// Путь до рабочей директории.
@@ -117,13 +121,13 @@
             foreach (var questionResult in questionResults)
             {
                 var endPoint = startPoint + questionResult.Quota * (MaxPointX - MinPointX);
-                plot.PlotVSpan(startPoint, endPoint, label: questionResult.Question);
+                plot.PlotVSpan(startPoint, endPoint, label: SplitTooLongLabel(questionResult.Question));
                 startPoint = endPoint;
             }
 
-            plot.XLabel(@"Доля неверных ответов.");
+            plot.XLabel(@"Доля неверных ответов.", fontSize: 4 * FontSize);
             plot.Axis(MinPointX, MaxPointX, MinPointY, MaxPointY);
-            plot.Legend();
+            plot.Legend(fontSize: FontSize);
             plot.SaveFig(path);
 
             return path;
@@ -134,26 +138,35 @@
         {
             var path = Path.Combine(_workFolderPath, GenerateName() + @".png");
             var plot = new Plot(Width, High);
-            var minimum = userResults.Min(result => result.Result.Keys.Min());
-            var maximum = userResults.Max(result => result.Result.Keys.Max());
-            foreach (var result in userResults)
+            if (userResults.Any())
             {
-                plot.PlotScatter(
-                    ConvertDateToDouble(result.Result.Keys, minimum, maximum).ToArray(),
-                    result.Result.Values.Select(item => (double) item).ToArray(),
-                    label: result.User);
+                var minimum = userResults.Min(result => result.Result.Keys.Min());
+                var maximum = userResults.Max(result => result.Result.Keys.Max());
+                foreach (var result in userResults)
+                {
+                    plot.PlotScatter(
+                        ConvertDateToDouble(result.Result.Keys, minimum, maximum).ToArray(),
+                        result.Result.Values.Select(item => (double) item).ToArray(),
+                        label: result.User,
+                        markerSize: 10);
 
-                SetLabels(
-                    plot, 
-                    result.Result.Keys, 
-                    result.Result.Values.Select(item => (double) item), minimum,
-                    maximum);
+                    SetLabels(
+                        plot,
+                        result.Result.Keys,
+                        result.Result.Values.Select(item => (double) item), minimum,
+                        maximum);
+                }
+
+                plot.XLabel(
+                    (maximum - minimum).TotalHours <= 24 
+                        ? @"Время прохождения теста." 
+                        : @"Дата прохождения теста.",
+                    fontSize: 4 * FontSize);
             }
 
-            plot.XLabel(@"Дата прохождения теста.");
-            plot.YLabel(@"Доля верных ответов.");
+            plot.YLabel(@"Доля верных ответов.", fontSize: 4 * FontSize);
             plot.Axis(MinPointX, MaxPointX, MinPointY, MaxPointY);
-            plot.Legend();
+            plot.Legend(fontSize: 2*FontSize);
             plot.SaveFig(path);
 
             return path;
@@ -192,8 +205,10 @@
         /// <param name="max">Последняя дата прохождения теста.</param>
         private static void SetLabels(Plot plot, IEnumerable<DateTime> datas, IEnumerable<double> dataY, DateTime min, DateTime max)
         {
-            const int division = 20;
+            const int division = 30;
+            const double offsetX = 7.5; 
             var datasLoc = datas.ToList();
+            var dateFormat = (max - min).TotalHours <= 24 ? @"t" : @"d";
             var dataX = ConvertDateToDouble(datasLoc, min, max).ToList();
             for (var i = 0; i < datasLoc.Count; i++)
             {
@@ -202,9 +217,37 @@
                     ? y + (MaxPointY - MinPointY) / division
                     : y - (MaxPointY - MinPointY) / division;
 
-                var x = dataX[i] > MaxPointX - 15 ? MaxPointX - 15.0 : dataX[i];
-                plot.PlotText(datasLoc[i].ToString("d"), x, y, Color.Black);
+                var x = dataX[i] > MaxPointX - offsetX ? MaxPointX - offsetX : dataX[i];
+                plot.PlotText(datasLoc[i].ToString(dateFormat), x, y, Color.Black, fontSize: 2*FontSize);
             }
+        }
+
+        /// <summary>
+        /// Добавление переноса строки в слишком длинные сообщения.
+        /// </summary>
+        /// <param name="message">Сообщение.</param>
+        /// <returns>Разделенные на несколько строк сообщение.</returns>
+        private static string SplitTooLongLabel(string message)
+        {
+            const int maxLineLength = 200;
+            if (message.Length <= maxLineLength)
+                return Environment.NewLine + message;
+
+            var lines = new List<string> { string.Empty };
+            var index = 0;
+            var words = message.Split(' ').Where(word => !string.IsNullOrWhiteSpace(word));
+            foreach (var word in words)
+            {
+                if (lines[index].Length <= maxLineLength)
+                    lines[index] += @" " + word;
+                else
+                {
+                    lines.Add(word);
+                    index++;
+                }
+            }
+
+            return Environment.NewLine + string.Join(Environment.NewLine, lines);
         }
     }
 }
