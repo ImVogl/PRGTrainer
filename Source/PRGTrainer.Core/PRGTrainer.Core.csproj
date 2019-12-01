@@ -96,5 +96,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\PRGTrainer.Shared\PRGTrainer.Shared.csproj">
+      <Project>{4465D184-312F-4EF8-B4BA-E3F432D20653}</Project>
+      <Name>PRGTrainer.Shared</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

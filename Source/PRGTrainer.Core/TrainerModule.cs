@@ -6,6 +6,7 @@
     using ReferenceBookReaders;
     using ReferenceBookStorage;
     using ResultFileGenerator;
+    using Shared.EncryptString;
     using StatisticsCollector;
     using TasksProcessing;
     using TasksReaders;
@@ -27,6 +28,10 @@
             var token = ConfigurationManager.AppSettings[@"telegramToken"];
             builder.Register(c => new TelegramBotClient(token))
                 .As<ITelegramBotClient>()
+                .SingleInstance();
+
+            builder.RegisterType<Encrypter>()
+                .As<IEncrypter>()
                 .SingleInstance();
 
             builder.RegisterType<FileTasksReader>()

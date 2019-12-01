@@ -9,6 +9,7 @@
     using log4net;
     using Model.Result;
     using ResultFileGenerator;
+    using Shared.EncryptString;
 
     /// <summary>
     /// Обработчик администрирования.
@@ -43,6 +44,11 @@
         private readonly IResultFileGenerator _resultFileGenerator;
 
         /// <summary>
+        /// Шифровальщик.
+        /// </summary>
+        private readonly IEncrypter _encrypter;
+
+        /// <summary>
         /// Соединение с сервером.
         /// </summary>
         private readonly SqlConnection _connection;
@@ -53,9 +59,11 @@
         /// Инициализирует экземпляр <see cref="AdminHandler"/>
         /// </summary>
         /// <param name="resultFileGenerator">Генератор результатов пользователей.</param>
-        public AdminHandler([NotNull]IResultFileGenerator resultFileGenerator)
+        /// <param name="encrypter">Шифровальщик.</param>
+        public AdminHandler([NotNull]IResultFileGenerator resultFileGenerator, [NotNull]IEncrypter encrypter)
         {
             _resultFileGenerator = resultFileGenerator;
+            _encrypter = encrypter;
             var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings[@"UserStatistics"].ConnectionString;
             _connection = new SqlConnection(connectionString);
             Logger = LogManager.GetLogger(typeof(AdminHandler));
@@ -72,7 +80,7 @@
         /// <inheritdoc />
         public async Task<bool> TryAddNewAdmin(int identifier, string token)
         {
-            var query = $"EXECUTE dbo.AddAdmin @Token = '{token}', @Identifier = {identifier}";
+            var query = $"EXECUTE dbo.AddAdmin @Token = '{_encrypter.Encrypt(token)}', @Identifier = {identifier}";
             try
             {
                 await _connection.OpenAsync().ConfigureAwait(false);
