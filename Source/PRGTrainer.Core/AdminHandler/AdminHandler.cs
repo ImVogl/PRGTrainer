@@ -144,7 +144,7 @@
                     while (await reader.ReadAsync().ConfigureAwait(false))
                     {
                         var user = reader.GetString(0);
-                        var result = reader.GetInt32(1);
+                        var result = (int)reader.GetDouble(1);
                         var date = reader.GetDateTime(2);
                         if (results.Any(item => item.User == user))
                             results[results.FindIndex(item => item.User == user)].Result[date] = result;
@@ -164,6 +164,13 @@
             finally
             {
                 _connection.Close();
+            }
+
+            foreach (var result in results)
+            {
+                var sortedResult = new SortedDictionary<DateTime, int>(result.Result);
+                var keyValuePairs = sortedResult.OrderBy(item => item.Key);
+                result.Result = keyValuePairs.ToDictionary(item => item.Key, item => item.Value);
             }
 
             if (OutputFileType.Equals(StatisticOutputFileType.Image))
