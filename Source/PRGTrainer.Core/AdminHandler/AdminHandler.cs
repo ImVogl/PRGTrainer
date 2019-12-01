@@ -22,12 +22,7 @@
         /// Таблица с администраторами.
         /// </summary>
         private const string AdminsTable = @"Admins";
-
-        /// <summary>
-        /// Таблица с токенами.
-        /// </summary>
-        private const string TokensTable = @"Tokens";
-
+        
         /// <summary>
         /// Таблица с результатами пользователя.
         /// </summary>
