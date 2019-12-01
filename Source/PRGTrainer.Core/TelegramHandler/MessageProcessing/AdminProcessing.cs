@@ -146,7 +146,7 @@
 
             if (command.Contains(TokenKey))
             {
-                if (!await _adminHandler.TryAddNewAdmin(_argumentParser.Parse(command, TokenKey)).ConfigureAwait(false))
+                if (!await _adminHandler.TryAddNewAdmin(id, _argumentParser.Parse(command, TokenKey)).ConfigureAwait(false))
                 {
                     const string message = "Не удалось добавить вас в списке администраторов.\nВероятно, вы ввели неверный токен.";
                     await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);

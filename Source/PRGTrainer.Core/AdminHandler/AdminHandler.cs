@@ -70,9 +70,29 @@
         private ILog Logger { get; }
 
         /// <inheritdoc />
-        public async Task<bool> TryAddNewAdmin(string token)
+        public async Task<bool> TryAddNewAdmin(int identifier, string token)
         {
-            throw new NotImplementedException();
+            var query = $"EXECUTE dbo.AddAdmin @Token = {token} @Identifier = {identifier}";
+            try
+            {
+                await _connection.OpenAsync().ConfigureAwait(false);
+                using (var command = new SqlCommand(query, _connection))
+                {
+                    await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                if (Logger.IsErrorEnabled)
+                    Logger.Error(@"Не удалось добавить нового администратора!", exception);
+            }
+            finally
+            {
+                _connection.Close();
+            }
+
+            return await IsUserAdmin(identifier).ConfigureAwait(false);
         }
 
         /// <inheritdoc />

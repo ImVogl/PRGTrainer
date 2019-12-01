@@ -18,9 +18,10 @@
         /// <summary>
         /// Попытка добавить нового администратора.
         /// </summary>
+        /// <param name="identifier">Идентификатор пользователя.</param>
         /// <param name="token">Токен.</param>
         /// <returns>Задача с результатом попытки добавления пользователя.</returns>
-        Task<bool> TryAddNewAdmin([NotNull] string token);
+        Task<bool> TryAddNewAdmin([NotNull]int identifier, [NotNull] string token);
 
         /// <summary>
         /// Проверка, является ли пользователь администратором.
