@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Парсер аргументов.
@@ -15,10 +16,8 @@
             if (string.IsNullOrWhiteSpace(arguments) || !arguments.ToLower().Contains(paramName.ToLower()))
                 return string.Empty;
 
-            var secondPart = arguments
-                .ToLower()
-                .Split(new[] { paramName.ToLower() }, StringSplitOptions.RemoveEmptyEntries)
-                .LastOrDefault() ?? string.Empty;
+            var regex = new Regex(paramName, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+            var secondPart = regex.Split(arguments, 2).LastOrDefault() ?? string.Empty;
 
             return !string.IsNullOrWhiteSpace(secondPart) 
                 ? secondPart.Split('/').First().TrimEnd(' ')

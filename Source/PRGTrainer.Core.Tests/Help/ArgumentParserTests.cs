@@ -20,14 +20,14 @@
         public void TargetArgumentTest()
         {
             const string command = @"/first:first /aRg:vaLue, date /second:secondValue";
-            Assert.That(ArgumentParser.Parse(command, @"/arg:"), Is.EqualTo(@"value, date"));
+            Assert.That(ArgumentParser.Parse(command, @"/arg:"), Is.EqualTo(@"vaLue, date"));
         }
 
         [Test, Description(@"Получение значение аргумента при наличие двух одинаковых аргументов.")]
         public void GetDoubleParamTest()
         {
             const string command = @"/aRg:vaLue /first:first /aRg:vaLue, date /second:secondValue";
-            Assert.That(ArgumentParser.Parse(command, @"/arg:"), Is.EqualTo(@"value, date"));
+            Assert.That(ArgumentParser.Parse(command, @"/arg:"), Is.EqualTo(@"vaLue"));
         }
 
         [Test, Description(@"Получение коллекции значений из аргумента.")]
@@ -37,7 +37,7 @@
 
             var result = ArgumentParser.ParseCollection(command, @"/arg:").ToList();
             Assert.That(result.Count, Is.EqualTo(2));
-            Assert.That(result[0], Is.EqualTo(@"value"));
+            Assert.That(result[0], Is.EqualTo(@"vaLue"));
             Assert.That(result[1], Is.EqualTo(@"date"));
         }
     }
