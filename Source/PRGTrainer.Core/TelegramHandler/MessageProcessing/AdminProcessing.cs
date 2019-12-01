@@ -213,7 +213,7 @@
         {
             string path;
             var users = _argumentParser.ParseCollection(command, UsersKey)
-                .Select(user => user.TrimEnd('@'))
+                .Select(user => user.TrimStart('@'))
                 .Where(user => !string.IsNullOrWhiteSpace(user))
                 .ToList();
 
