@@ -12,6 +12,7 @@
     using Telegram.Bot.Args;
     using Telegram.Bot.Types.Enums;
     using Telegram.Bot.Types.InputFiles;
+    using Telegram.Bot.Types.ReplyMarkups;
 
     /// <summary>
     /// Обработчик сообщений при администрировании.
@@ -159,7 +160,7 @@
                 if (!await _adminHandler.TryAddNewAdmin(id, _argumentParser.Parse(command, TokenKey)).ConfigureAwait(false))
                 {
                     const string message = "Не удалось добавить вас в список администраторов.\nВероятно, вы ввели неверный токен.";
-                    await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
+                    await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: GetKeyboard()).ConfigureAwait(false);
                     return;
                 }
             }
@@ -171,7 +172,7 @@
                         @"Не удалось найти вас в списке администраторов.{0}Введите токен доступа следующим образом:{1}token",
                         Environment.NewLine, TokenKey);
 
-                await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
+                await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: GetKeyboard()).ConfigureAwait(false);
                 return;
             }
 
@@ -188,7 +189,7 @@
                 return;
             }
 
-            await _telegramBotClient.SendTextMessageAsync(id, _defaultMessage).ConfigureAwait(false);
+            await _telegramBotClient.SendTextMessageAsync(id, _defaultMessage, replyMarkup: GetKeyboard()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -211,7 +212,11 @@
         private async Task GetUserStatistic(int id, string command)
         {
             string path;
-            var users = _argumentParser.ParseCollection(command, UsersKey).Select(user => user.TrimEnd('@')).ToList();
+            var users = _argumentParser.ParseCollection(command, UsersKey)
+                .Select(user => user.TrimEnd('@'))
+                .Where(user => !string.IsNullOrWhiteSpace(user))
+                .ToList();
+
             if (command.Contains(StartDateKey))
                 path = await _adminHandler.GetStatisticForUsers(users, GetDateTime(command), id).ConfigureAwait(false);
             else
@@ -235,7 +240,7 @@
                     : @"Result.txt";
 
                 var file = new InputOnlineFile(stream, fileName);
-                await _telegramBotClient.SendDocumentAsync(id, file);
+                await _telegramBotClient.SendDocumentAsync(id, file, replyMarkup: GetKeyboard());
             }
 
             File.Delete(path);
@@ -268,6 +273,15 @@
 
             if (_outputFileTypes.ContainsKey(id))
                 _adminHandler.OutputFileType = _outputFileTypes[id];
+        }
+
+        /// <summary>
+        /// Добавление клавиатуры.
+        /// </summary>
+        /// <returns>Клавиатура.</returns>
+        private ReplyKeyboardMarkup GetKeyboard()
+        {
+            return new ReplyKeyboardMarkup(new KeyboardButton(_testStateController.FinishCommand));
         }
 
         #endregion
