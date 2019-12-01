@@ -53,7 +53,7 @@
         /// Инициализирует экземпляр <see cref="AdminHandler"/>
         /// </summary>
         /// <param name="resultFileGenerator">Генератор результатов пользователей.</param>
-        private AdminHandler([NotNull]IResultFileGenerator resultFileGenerator)
+        public AdminHandler([NotNull]IResultFileGenerator resultFileGenerator)
         {
             _resultFileGenerator = resultFileGenerator;
             var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings[@"UserStatistics"].ConnectionString;
@@ -72,7 +72,7 @@
         /// <inheritdoc />
         public async Task<bool> TryAddNewAdmin(int identifier, string token)
         {
-            var query = $"EXECUTE dbo.AddAdmin @Token = {token} @Identifier = {identifier}";
+            var query = $"EXECUTE dbo.AddAdmin @Token = '{token}', @Identifier = {identifier}";
             try
             {
                 await _connection.OpenAsync().ConfigureAwait(false);
@@ -106,7 +106,7 @@
                 {
                     var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
                     await reader.ReadAsync().ConfigureAwait(false);
-                    return reader.GetInt32(0) == 0; 
+                    return reader.GetInt32(0) != 0;
                 }
             }
             catch (Exception exception)

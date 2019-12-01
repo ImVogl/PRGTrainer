@@ -43,12 +43,12 @@
         /// <summary>
         /// Ключ получения статистики пользователей.
         /// </summary>
-        private const string UserStatisticKey = @"/userstat:";
+        private const string UserStatisticKey = @"/userstat";
 
         /// <summary>
         /// Ключ получения статистики по вопросам.
         /// </summary>
-        private const string QuestionStatisticKey = @"/questionsstat:";
+        private const string QuestionStatisticKey = @"/questionsstat";
 
         /// <summary>
         /// Ключ ввода токена доступа.
@@ -84,6 +84,11 @@
         /// </summary>
         private readonly Dictionary<int, StatisticOutputFileType> _outputFileTypes;
 
+        /// <summary>
+        /// Информационное сообщение для администратора.
+        /// </summary>
+        private readonly string _defaultMessage;
+
         #endregion
 
         /// <summary>
@@ -104,6 +109,23 @@
             _adminHandler = adminHandler;
             _argumentParser = argumentParser;
             _outputFileTypes = new Dictionary<int, StatisticOutputFileType>();
+
+            _defaultMessage = string.Format(
+                @"{0} - Получение статистики по вопросам.{1}{2} - Получение статистики по пользователям.{1}" +
+                @"Вспомогательный ключ:{1}" +
+                @"{5} - тип файла со статистикой (txt - текстовый, {7} - изображение, по-умолчанию txt).{1}{1}" +
+                @"Для статистики по пользователям существуют дополнительные ключи:{1}" +
+                @"{3}{4} - пользователи, для которых нужно отобразить статистику (по-умолчанию все пользователи).{1}" +
+                @"{3}{6} - дата, начиная с которой стоит выдать статистику (по-умолчанию за все время.){1}{1}" +
+                @"Пример: {2} {4}:User1, @User2 {5}:{7} {6}:20.01.2018",
+                QuestionStatisticKey,
+                Environment.NewLine,
+                UserStatisticKey,
+                "\t\t",
+                UsersKey.TrimEnd(':'),
+                OutTypeKey.TrimEnd(':'),
+                StartDateKey.TrimEnd(':'),
+                OutTypeImg);
         }
 
         /// <inheritdoc />
@@ -132,6 +154,15 @@
         /// <returns>Задача.</returns>
         private async Task ProcessMessage(int id, string command)
         {
+            if (command.Contains(TokenKey))
+            {
+                if (!await _adminHandler.TryAddNewAdmin(id, _argumentParser.Parse(command, TokenKey)).ConfigureAwait(false))
+                {
+                    const string message = "Не удалось добавить вас в список администраторов.\nВероятно, вы ввели неверный токен.";
+                    await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
+                    return;
+                }
+            }
 
             if (!await _adminHandler.IsUserAdmin(id).ConfigureAwait(false))
             {
@@ -144,16 +175,6 @@
                 return;
             }
 
-            if (command.Contains(TokenKey))
-            {
-                if (!await _adminHandler.TryAddNewAdmin(id, _argumentParser.Parse(command, TokenKey)).ConfigureAwait(false))
-                {
-                    const string message = "Не удалось добавить вас в списке администраторов.\nВероятно, вы ввели неверный токен.";
-                    await _telegramBotClient.SendTextMessageAsync(id, message).ConfigureAwait(false);
-                    return;
-                }
-            }
-
             SetOutFileType(id, command);
             if (command.Contains(QuestionStatisticKey))
             {
@@ -162,8 +183,12 @@
             }
 
             if (command.Contains(UserStatisticKey))
+            {
                 await GetUserStatistic(id, command).ConfigureAwait(false);
+                return;
+            }
 
+            await _telegramBotClient.SendTextMessageAsync(id, _defaultMessage).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -186,7 +211,7 @@
         private async Task GetUserStatistic(int id, string command)
         {
             string path;
-            var users = _argumentParser.ParseCollection(command, UsersKey).ToList();
+            var users = _argumentParser.ParseCollection(command, UsersKey).Select(user => user.TrimEnd('@')).ToList();
             if (command.Contains(StartDateKey))
                 path = await _adminHandler.GetStatisticForUsers(users, GetDateTime(command), id).ConfigureAwait(false);
             else
@@ -205,9 +230,15 @@
         {
             using (var stream = new FileStream(path, FileMode.Open))
             {
-                var file = new InputOnlineFile(stream, @"Result");
+                var fileName = _outputFileTypes[id].Equals(StatisticOutputFileType.Image)
+                    ? @"Result.png"
+                    : @"Result.txt";
+
+                var file = new InputOnlineFile(stream, fileName);
                 await _telegramBotClient.SendDocumentAsync(id, file);
             }
+
+            File.Delete(path);
         }
 
         /// <summary>
@@ -230,13 +261,13 @@
         /// <param name="command">Команда.</param>
         private void SetOutFileType(int id, string command)
         {
-            if (command.Contains(OutTypeKey))
-                _outputFileTypes[id] = 
-                    _argumentParser.Parse(command, OutTypeKey) == OutTypeImg
-                        ? StatisticOutputFileType.Image
-                        : StatisticOutputFileType.Text;
+            _outputFileTypes[id] = 
+                _argumentParser.Parse(command, OutTypeKey) == OutTypeImg
+                    ? StatisticOutputFileType.Image
+                    : StatisticOutputFileType.Text;
 
-            _adminHandler.OutputFileType = _outputFileTypes[id];
+            if (_outputFileTypes.ContainsKey(id))
+                _adminHandler.OutputFileType = _outputFileTypes[id];
         }
 
         #endregion

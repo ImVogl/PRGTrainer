@@ -18,9 +18,11 @@
             var secondPart = arguments
                 .ToLower()
                 .Split(new[] { paramName.ToLower() }, StringSplitOptions.RemoveEmptyEntries)
-                .Last();
+                .LastOrDefault() ?? string.Empty;
 
-            return secondPart.Split('/').First().TrimEnd(' ');
+            return !string.IsNullOrWhiteSpace(secondPart) 
+                ? secondPart.Split('/').First().TrimEnd(' ')
+                : secondPart;
         }
 
         /// <inheritdoc />

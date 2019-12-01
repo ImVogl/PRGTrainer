@@ -52,8 +52,11 @@
         /// <param name="referenceBookStorage">Хранилище справочника.</param>
         /// <param name="messageProcessors">Обработчики текстовых сообщений.</param>
         /// <param name="telegramBotClient">Клиент telegram.</param>
-        public TelegramHandler(ITasksStorage tasksStorage, IReferenceBookStorage referenceBookStorage,
-            IEnumerable<IMessageProcessing> messageProcessors, [NotNull] ITelegramBotClient telegramBotClient)
+        public TelegramHandler(
+            ITasksStorage tasksStorage,
+            IReferenceBookStorage referenceBookStorage,
+            IEnumerable<IMessageProcessing> messageProcessors,
+            [NotNull] ITelegramBotClient telegramBotClient)
         {
             _telegramBotClient = telegramBotClient;
             _tasksStorage = tasksStorage;

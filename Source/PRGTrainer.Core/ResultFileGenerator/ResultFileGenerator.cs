@@ -76,7 +76,11 @@
             if (File.Exists(path))
                 File.Delete(path);
 
-            File.WriteAllLines(path, questionResults.Select(result => $"{result.Question}\t{result.Quota:P3};"));
+            if(questionResults.Any())
+                File.WriteAllLines(path, questionResults.Select(result => $"{result.Question}\t{result.Quota:P3};"));
+            else
+                File.WriteAllText(path, @"(Нет результатов, отвечающих установленным критериям)");  
+
             return path;
         }
 
@@ -86,6 +90,12 @@
             var path = Path.Combine(_workFolderPath, GenerateName() + @".txt");
             if(File.Exists(path))
                 File.Delete(path);
+
+            if (!userResults.Any())
+            {
+                File.WriteAllText(path, @"(Нет результатов, отвечающих установленным критериям)");
+                return path;
+            }
 
             File.WriteAllText(path, @"");
             foreach (var result in userResults)
