@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data.SqlClient;
     using System.Threading.Tasks;
     using log4net;
@@ -35,7 +36,7 @@
         /// </summary>
         public StatisticsCollector()
         {
-            _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings[@"UserStatistics"].ConnectionString;
+            _connectionString = ConfigurationManager.ConnectionStrings[@"UserStatistics"].ConnectionString;
             Logger = LogManager.GetLogger(typeof(StatisticsCollector));
         }
 
