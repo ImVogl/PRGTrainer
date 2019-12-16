@@ -89,6 +89,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\AutoCount.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\ManualCount.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="PRGTasks.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
