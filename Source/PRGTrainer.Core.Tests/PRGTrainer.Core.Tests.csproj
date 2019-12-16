@@ -83,6 +83,9 @@
     <Content Include="TestItems\NoQuestion\PRGTasks.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestItems\ReferenceBook\Correct\ManualCount.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestItems\ReferenceBook\Correct\ReferenceBook.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

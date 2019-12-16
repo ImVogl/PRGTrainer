@@ -46,6 +46,7 @@
             var firstSubSubParts = firstSubParts[1].SubParts.ToList();
             Assert.That(firstSubSubParts[0].Content, Is.Not.Null);
             Assert.That(firstSubSubParts[0].Content, Is.EqualTo(@"Содержимое параграфа."));
+            Assert.That(firstSubSubParts[0].FilePath, Is.Null);
             Assert.That(firstSubSubParts[0].Name, Is.Not.Null);
             Assert.That(firstSubSubParts[0].Name, Is.EqualTo(@"Первый параграф"));
             Assert.That(firstSubSubParts[0].ParentIdentifier, Is.EqualTo(firstSubParts[1].Identifier));
@@ -61,6 +62,8 @@
             Assert.That(secondSubParts[0].Name, Is.EqualTo(@"Первый подраздел"));
             Assert.That(secondSubParts[0].Content, Is.Not.Null);
             Assert.That(secondSubParts[0].Content, Is.EqualTo(@"Содержимое раздела."));
+            Assert.That(secondSubParts[0].FilePath, Is.Not.Null);
+            Assert.That(secondSubParts[0].FilePath, Is.EqualTo(Path.Combine(RootFolder, @"Correct\ManualCount.png")));
             Assert.That(secondSubParts[0].SubParts, Is.Not.Null);
             Assert.That(secondSubParts[0].SubParts, Is.Empty);
             Assert.That(secondSubParts[0].ParentIdentifier, Is.EqualTo(referenceBook[1].Identifier));

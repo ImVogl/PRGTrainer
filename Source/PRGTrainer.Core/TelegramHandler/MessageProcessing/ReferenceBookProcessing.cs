@@ -1,6 +1,7 @@
 ﻿namespace PRGTrainer.Core.TelegramHandler.MessageProcessing
 {
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Model.ReferenceBook;
@@ -9,6 +10,7 @@
     using Telegram.Bot;
     using Telegram.Bot.Args;
     using Telegram.Bot.Types.Enums;
+    using Telegram.Bot.Types.InputFiles;
     using Telegram.Bot.Types.ReplyMarkups;
 
     /// <summary>
@@ -109,7 +111,11 @@
         {
             var message = _refDeepLevels[id].Content ?? _refDeepLevels[id].Name;
             var keyboard = CreateButtons(_refDeepLevels[id]);
-            await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard).ConfigureAwait(false);
+            if (_refDeepLevels[id].FilePath == null)
+                await _telegramBotClient.SendTextMessageAsync(id, message, replyMarkup: keyboard).ConfigureAwait(false);
+            else
+                using (var stream = new FileStream(_refDeepLevels[id].FilePath, FileMode.Open))
+                    await _telegramBotClient.SendPhotoAsync(id, new InputOnlineFile(stream), message, replyMarkup: keyboard).ConfigureAwait(false);
         }
 
         /// <summary>

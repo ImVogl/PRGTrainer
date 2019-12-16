@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Xml.Linq;
     using System.Xml.Schema;
     using Model.ReferenceBook;
@@ -36,6 +37,11 @@
         private const string Content = @"content";
 
         /// <summary>
+        /// Имя узла с относительным путем до файла.
+        /// </summary>
+        private const string FilePath = @"path";
+
+        /// <summary>
         /// Счетчик идентификаторов.
         /// </summary>
         private int _identifierCount;
@@ -66,6 +72,9 @@
             if (node.Attribute("Name") == null || string.IsNullOrWhiteSpace(node.Attribute("Name").Value))
                 throw new XmlSchemaException(@"Не удалось получить имя раздела.");
 
+            var assemblyPath = Assembly.GetAssembly(typeof(FileReferenceBookReader)).Location;
+            var filePath = Path.Combine(Path.GetDirectoryName(assemblyPath) ?? string.Empty, node.Element(FilePath)?.Value ?? string.Empty);
+
             _identifierCount++;
             var localIdentifier = _identifierCount;
             return new ReferenceBookPart
@@ -73,6 +82,7 @@
                 Name = node.Attribute("Name").Value,
                 Identifier = localIdentifier,
                 Content = node.Element(Content)?.Value,
+                FilePath = File.Exists(filePath) ? filePath : null,
                 ParentIdentifier = parentIdentifier,
                 SubParts = node.Elements(SubPartNode).Select(element => ResolveStructure(element, localIdentifier)).ToList()
             };

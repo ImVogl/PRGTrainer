@@ -32,6 +32,12 @@
         public string Content { get; set; }
 
         /// <summary>
+        /// Получает или задает путь до файла.
+        /// </summary>
+        [CanBeNull]
+        public string FilePath { get; set; }
+
+        /// <summary>
         /// Получает или задает коллекцию подразделов.
         /// </summary>
         [CanBeNull]
