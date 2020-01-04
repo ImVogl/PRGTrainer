@@ -28,6 +28,11 @@
         private readonly Graphics _graphics;
 
         /// <summary>
+        /// Изображение.
+        /// </summary>
+        private readonly PictureBox _imageBox;
+
+        /// <summary>
         /// Начальная позиция признака.
         /// </summary>
         private Point _startPosition;
@@ -51,9 +56,15 @@
                 DashStyle = DashStyle.Dash
             };
 
-            imageBox.SizeMode = PictureBoxSizeMode.AutoSize;
-            canvasView.Controls.Add(imageBox);
-            _graphics = canvasView.CreateGraphics();
+            _imageBox = imageBox;
+            _imageBox.SizeMode = PictureBoxSizeMode.Zoom;
+            _imageBox.SizeMode = PictureBoxSizeMode.AutoSize;
+            _imageBox.MouseDown += StartPointEvent;
+            _imageBox.MouseUp += FinishPointEvent;
+            _imageBox.MouseMove += DrawRectangle;
+            _graphics = _imageBox.CreateGraphics();
+
+            canvasView.Controls.Add(_imageBox);
             SignPosition = Rectangle.Empty;
             _isMouseButtonPressed = false;
         }
@@ -84,6 +95,7 @@
             var startX = args.X - _startPosition.X > 0 ? _startPosition.X : args.X;
             var startY = args.Y - _startPosition.Y > 0 ? _startPosition.Y : args.Y;
             SignPosition = new Rectangle(startX, startY, Math.Abs(args.X - _startPosition.X), Math.Abs(args.Y - _startPosition.Y));
+            DrawRectangle(sender, args);
             _isMouseButtonPressed = false;
         }
 
@@ -94,11 +106,12 @@
         /// <param name="args">Аргументы события.</param>
         public void DrawRectangle(object sender, MouseEventArgs args)
         {
-            if (_isMouseButtonPressed)
+            if (!_isMouseButtonPressed)
                 return;
 
             var startX = args.X - _startPosition.X > 0 ? _startPosition.X : args.X;
             var startY = args.Y - _startPosition.Y > 0 ? _startPosition.Y : args.Y;
+            _imageBox.Invalidate();
             _graphics.DrawRectangle(_pen, startX, startY, Math.Abs(args.X - _startPosition.X), Math.Abs(args.Y - _startPosition.Y));
         }
     }

@@ -30,6 +30,11 @@
         /// </summary>
         private const int MinWidth = 250;
 
+        /// <summary>
+        /// Презентер.
+        /// </summary>
+        private CanvasPresenter _canvasPresenter;
+
         #endregion
 
         /// <summary>
@@ -56,11 +61,8 @@
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            Cursor.Current = Cursors.Cross;
-            var presenter = new CanvasPresenter(this, imageBox);
-            MouseDown += presenter.StartPointEvent;
-            MouseUp += presenter.FinishPointEvent;
-            MouseMove += presenter.DrawRectangle;
+            _canvasPresenter = new CanvasPresenter(this, imageBox);
+
             if (form == null)
                 return;
 

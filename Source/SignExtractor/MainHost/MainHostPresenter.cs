@@ -145,12 +145,13 @@
             _currentCanvas = 0;
             foreach (var path in _imagePaths)
             {
-                var control = new CanvasView(_view, new PictureBox { Image = Image.FromFile(path) });
+                var control = new CanvasView(_view, new PictureBox { Image = Image.FromFile(path), Cursor = Cursors.Cross });
                 _canvasControls.Add(control);
                 _view.Controls.Add(control);
             }
 
             _canvasControls[_currentCanvas].Show();
+            _canvasControls[_currentCanvas].Focus();
             _view.PathToImageLabel.Text = Path.GetFileName(_imagePaths[_currentCanvas]);
         }
 

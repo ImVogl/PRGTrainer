@@ -33,7 +33,11 @@
         private void CustomInitialize()
         {
             _presenter = new MainHostPresenter(this);
-            btnSelectWorkDir.Click += (sender, args) => _presenter.SetImages();
+            btnSelectWorkDir.Click += (sender, args) =>
+            {
+                _presenter.SetImages();
+                btnNextImage.Enabled = true;
+            };
             btnNextImage.Click += (sender, args) =>
             {
                 var button = sender as Button;
@@ -41,6 +45,7 @@
                     return;
 
                 button.Enabled = _presenter.SetNextCanvas();
+                btnPreviousImage.Enabled = true;
             };
 
             btnPreviousImage.Click += (sender, args) => 
@@ -50,6 +55,7 @@
                     return;
 
                 button.Enabled = _presenter.SetPreviousCanvas();
+                btnNextImage.Enabled = true;
             };
 
             btnRemoveImage.Click += (sender, args) =>
