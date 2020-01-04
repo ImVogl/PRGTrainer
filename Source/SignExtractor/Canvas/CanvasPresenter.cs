@@ -92,6 +92,14 @@
             _imageBox.Size = new Size((int)(_imageBox.Image.Size.Width / _coefficient), (int)(_imageBox.Image.Size.Height / _coefficient));
         }
 
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _imageBox.Image.Dispose();
+            _imageBox.Image = null;
+            _imageBox.Dispose();
+        }
+
         #region Private methods
 
         /// <summary>

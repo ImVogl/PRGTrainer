@@ -73,13 +73,32 @@
             }
         }
 
+        /// <summary>
+        /// Освобождение занятых контролом ресурсов.
+        /// </summary>
+        public new void Dispose()
+        {
+            _canvasPresenter.Dispose();
+            base.Dispose();
+        }
+
         /// <inheritdoc />
         public void SetImageScale(float progress)
         {
             _canvasPresenter.SetImageScale(progress);
         }
 
-        #region Private methods
+        #region Private and protected methods
+
+        /// <summary>
+        /// Действие при изменении свойства.
+        /// </summary>
+        /// <param name="propertyName">Имя свойства.</param>
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         /// <summary>
         /// Инициализация производных параметров.
@@ -114,11 +133,5 @@
         }
 
         #endregion
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

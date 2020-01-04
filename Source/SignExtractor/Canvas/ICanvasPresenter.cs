@@ -1,11 +1,12 @@
 ﻿namespace SignExtractor.Canvas
 {
+    using System;
     using System.Drawing;
 
     /// <summary>
     /// Интерфейс презентера области прорисовки изображения.
     /// </summary>
-    public interface ICanvasPresenter
+    public interface ICanvasPresenter : IDisposable
     {
         /// <summary>
         /// Получает положение признака.
