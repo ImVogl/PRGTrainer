@@ -1,12 +1,15 @@
 ﻿namespace SignExtractor.Canvas
 {
+    using System.ComponentModel;
     using System.Drawing;
+    using System.Runtime.CompilerServices;
     using System.Windows.Forms;
+    using Annotations;
 
     /// <summary>
     /// Отображение области прорисовки изображения.
     /// </summary>
-    public partial class CanvasView : UserControl
+    public partial class CanvasView : UserControl, ICanvasView, INotifyPropertyChanged
     {
         #region Private fields
 
@@ -33,7 +36,12 @@
         /// <summary>
         /// Презентер.
         /// </summary>
-        private CanvasPresenter _canvasPresenter;
+        private ICanvasPresenter _canvasPresenter;
+
+        /// <summary>
+        /// Область с признаком.
+        /// </summary>
+        private Rectangle _area;
 
         #endregion
 
@@ -46,6 +54,29 @@
         {
             InitializeComponent();
             CustomInitialize(form, imageBox);
+        }
+
+        /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <inheritdoc />
+        public Rectangle Area
+        {
+            get { return _area; }
+            private set
+            {
+                if (_area == value || value.Height*value.Width == 0)
+                    return;
+
+                _area = value;
+                OnPropertyChanged(nameof(Area));
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetImageScale(float progress)
+        {
+            _canvasPresenter.SetImageScale(progress);
         }
 
         #region Private methods
@@ -62,6 +93,10 @@
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             _canvasPresenter = new CanvasPresenter(this, imageBox);
+            imageBox.MouseUp += (sender, args) =>
+            {
+                Area = _canvasPresenter.SignPosition;
+            };
 
             if (form == null)
                 return;
@@ -79,5 +114,11 @@
         }
 
         #endregion
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

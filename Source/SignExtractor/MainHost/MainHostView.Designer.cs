@@ -36,6 +36,9 @@
             this.btnPreviousImage = new System.Windows.Forms.Button();
             this.btnNextImage = new System.Windows.Forms.Button();
             this.btnRemoveImage = new System.Windows.Forms.Button();
+            this.scbScale = new System.Windows.Forms.HScrollBar();
+            this.lbScale = new System.Windows.Forms.Label();
+            this.btnSaveResult = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -95,11 +98,41 @@
             this.btnRemoveImage.Text = "Удалить";
             this.btnRemoveImage.UseVisualStyleBackColor = true;
             // 
+            // scbScale
+            // 
+            this.scbScale.Location = new System.Drawing.Point(390, 260);
+            this.scbScale.Name = "scbScale";
+            this.scbScale.Size = new System.Drawing.Size(180, 25);
+            this.scbScale.TabIndex = 7;
+            this.scbScale.Value = 100;
+            // 
+            // lbScale
+            // 
+            this.lbScale.AutoSize = true;
+            this.lbScale.Font = new System.Drawing.Font("Times New Roman", 14.25F);
+            this.lbScale.Location = new System.Drawing.Point(390, 285);
+            this.lbScale.Name = "lbScale";
+            this.lbScale.Size = new System.Drawing.Size(83, 21);
+            this.lbScale.TabIndex = 8;
+            this.lbScale.Text = "Масштаб";
+            // 
+            // btnSaveResult
+            // 
+            this.btnSaveResult.Location = new System.Drawing.Point(480, 60);
+            this.btnSaveResult.Name = "btnSaveResult";
+            this.btnSaveResult.Size = new System.Drawing.Size(90, 25);
+            this.btnSaveResult.TabIndex = 9;
+            this.btnSaveResult.Text = "Сохранить";
+            this.btnSaveResult.UseVisualStyleBackColor = true;
+            // 
             // MainHostView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 311);
+            this.Controls.Add(this.btnSaveResult);
+            this.Controls.Add(this.lbScale);
+            this.Controls.Add(this.scbScale);
             this.Controls.Add(this.btnRemoveImage);
             this.Controls.Add(this.btnNextImage);
             this.Controls.Add(this.btnPreviousImage);
@@ -122,6 +155,9 @@
         private System.Windows.Forms.Button btnPreviousImage;
         private System.Windows.Forms.Button btnNextImage;
         private System.Windows.Forms.Button btnRemoveImage;
+        private System.Windows.Forms.Label lbScale;
+        internal System.Windows.Forms.HScrollBar scbScale;
+        private System.Windows.Forms.Button btnSaveResult;
     }
 }
 

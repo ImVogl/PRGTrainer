@@ -31,6 +31,9 @@
     <Compile Include="Canvas\CanvasView.Designer.cs">
       <DependentUpon>CanvasView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Canvas\ICanvasPresenter.cs" />
+    <Compile Include="Canvas\ICanvasView.cs" />
+    <Compile Include="MainHost\IMainHostPresenter.cs" />
     <Compile Include="MainHost\MainHostPresenter.cs" />
     <Compile Include="MainHost\MainHostView.cs">
       <SubType>Form</SubType>
@@ -39,6 +42,7 @@
       <DependentUpon>MainHostView.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainHost\MainHostView.resx">
       <DependentUpon>MainHostView.cs</DependentUpon>

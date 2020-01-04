@@ -1,6 +1,7 @@
 ﻿namespace SignExtractor.MainHost
 {
     using System;
+    using System.Drawing;
     using System.Windows.Forms;
 
     /// <summary>
@@ -13,7 +14,7 @@
         /// <summary>
         /// Презентер для данного отображения.
         /// </summary>
-        private MainHostPresenter _presenter;
+        private IMainHostPresenter _presenter;
 
         #endregion
         /// <summary>
@@ -36,8 +37,10 @@
             btnSelectWorkDir.Click += (sender, args) =>
             {
                 _presenter.SetImages();
+                ChangeStateOfControls();
                 btnNextImage.Enabled = true;
             };
+
             btnNextImage.Click += (sender, args) =>
             {
                 var button = sender as Button;
@@ -61,11 +64,24 @@
             btnRemoveImage.Click += (sender, args) =>
             {
                 btnNextImage.Enabled = _presenter.RemoveCanvas();
+                ChangeStateOfControls();
             };
 
+            btnSaveResult.Click += (sender, args) => _presenter.SaveSignPositions();
             SizeChanged += ResizeWindow;
             btnPreviousImage.Enabled = false;
             btnNextImage.Enabled = false;
+            ChangeStateOfControls();
+        }
+
+        /// <summary>
+        /// Изменение состояния активности контроллов.
+        /// </summary>
+        private void ChangeStateOfControls()
+        {
+            scbScale.Enabled = !_presenter.IsImagesListEmpty;
+            btnSaveResult.Enabled = !_presenter.IsImagesListEmpty;
+            btnRemoveImage.Enabled = !_presenter.IsImagesListEmpty;
         }
 
         /// <summary>
@@ -79,11 +95,14 @@
             if (form == null)
                 return;
 
-            btnPreviousImage.Location = new System.Drawing.Point(10, form.Height - 90);
-            btnNextImage.Location = new System.Drawing.Point(60, form.Height - 90);
-            PathToImageLabel.Location = new System.Drawing.Point(120, form.Height - 90);
-            btnSelectWorkDir.Location = new System.Drawing.Point(form.Width - 120, 10);
-            btnRemoveImage.Location = new System.Drawing.Point(form.Width - 120, 35);
+            btnPreviousImage.Location = new Point(10, form.Height - 90);
+            btnNextImage.Location = new Point(60, form.Height - 90);
+            PathToImageLabel.Location = new Point(120, form.Height - 90);
+            btnSelectWorkDir.Location = new Point(form.Width - 120, 10);
+            btnRemoveImage.Location = new Point(form.Width - 120, 35);
+            scbScale.Location = new Point(form.Width - 210, form.Height - 90);
+            lbScale.Location = new Point(form.Width - 210, form.Height - 65);
+            btnSaveResult.Location = new Point(form.Width - 120, 60);
         }
 
         #endregion
