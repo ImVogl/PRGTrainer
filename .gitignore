@@ -10,4 +10,6 @@ obj
 /Source/**/Debug/**/*
 /Source/**/Release/**/*
 /Build/*
+/Source/ElementsRecognation/Deep-Reinforcement-Learning-Algorithms-with-PyTorch-master/*
+/Source/ElementsRecognation/data/*
 Info.txt
