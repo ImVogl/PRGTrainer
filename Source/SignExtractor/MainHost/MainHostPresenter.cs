@@ -90,7 +90,7 @@
         /// <inheritdoc />
         public bool SetPreviousCanvas()
         {
-            if (_currentCanvas <= 0)
+            if (_currentCanvas <= 0 || IsImagesListEmpty)
                 return false;
 
             _canvasControls[_currentCanvas].Hide();
@@ -103,7 +103,7 @@
         /// <inheritdoc />
         public bool SetNextCanvas()
         {
-            if (_currentCanvas == _canvasControls.Count - 1)
+            if (_currentCanvas == _canvasControls.Count - 1 || IsImagesListEmpty)
                 return false;
 
             _canvasControls[_currentCanvas].Hide();
@@ -123,8 +123,10 @@
                 _view.Controls.Remove(_canvasControls[_currentCanvas]);
                 _canvasControls.RemoveAt(_currentCanvas);
                 File.Delete(_imagePaths[_currentCanvas]);
-                _canvasControls[_currentCanvas].Show();
                 _imagePaths.RemoveAt(_currentCanvas);
+
+                if (!IsImagesListEmpty)
+                    _canvasControls[_currentCanvas].Show();
             }
             else
             {
@@ -134,7 +136,9 @@
                 _canvasControls.RemoveAt(_currentCanvas);
                 File.Delete(_imagePaths[_currentCanvas]);
                 _imagePaths.RemoveAt(_currentCanvas);
-                _canvasControls[--_currentCanvas].Show();
+
+                if(!IsImagesListEmpty)
+                    _canvasControls[--_currentCanvas].Show();
             }
 
             return _currentCanvas < _canvasControls.Count - 1;
