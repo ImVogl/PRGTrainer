@@ -134,7 +134,7 @@
                 _canvasControls.RemoveAt(_currentCanvas);
                 File.Delete(_imagePaths[_currentCanvas]);
                 _imagePaths.RemoveAt(_currentCanvas);
-                _canvasControls[_currentCanvas--].Show();
+                _canvasControls[--_currentCanvas].Show();
             }
 
             return _currentCanvas < _canvasControls.Count - 1;
