@@ -151,11 +151,12 @@
             foreach (var path in _signAreas.Keys)
                 if (_signAreas[path] != Rectangle.Empty)
                     areas.Add(
-                        $"{Path.GetFileName(path)}\t{_signAreas[path].X}\t{_signAreas[path].Y}\t{_signAreas[path].X + _signAreas[path].Width}\t{_signAreas[path].Y + _signAreas[path].Height}");
+                        $"{Path.GetFileName(path)};\t{_signAreas[path].X};\t{_signAreas[path].Y};\t{_signAreas[path].X + _signAreas[path].Width};\t{_signAreas[path].Y + _signAreas[path].Height};");
             
             using (var saveFileDialog = new SaveFileDialog())
             {
                 saveFileDialog.FileName = @"ObjectPositions.txt";
+                saveFileDialog.Filter = @"Текстовые файлы (*.txt)|*.txt";
                 var result = saveFileDialog.ShowDialog();
                 if (result != DialogResult.OK || string.IsNullOrWhiteSpace(saveFileDialog.FileName))
                     return;
