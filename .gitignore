@@ -6,6 +6,7 @@ bin
 *.pdb
 obj
 /DataSet/*
+!/DataSet/Templates/*
 /Libs/packages/*
 /Source/**/Debug/**/*
 /Source/**/Release/**/*
@@ -13,3 +14,4 @@ obj
 /Source/ElementsRecognation/Deep-Reinforcement-Learning-Algorithms-with-PyTorch-master/*
 /Source/ElementsRecognation/data/*
 Info.txt
+/Source/ElementsRecognation/.vs
