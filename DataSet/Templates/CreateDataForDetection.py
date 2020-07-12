@@ -10,12 +10,9 @@ path = join(getcwd(), argv[0], 'DetectionTemplate.png')
 outputDir = join(getcwd(), argv[0], 'Detection')
 
 img = cv2.imread(path)
-
 def Affine(img):
     sourceTriangle = np.float32([[50,50],[200,50],[50,200]])
     destTriangle = np.float32([[10,100],[200,50],[100,250]])
-    # sourceTriangle = np.float32([[-100, -100], [100, -100], [-100, 100]])
-    # destTriangle = np.float32([[-125, -150], [75, -250], [-50, 150]])
     tranformMatrix = cv2.getAffineTransform(sourceTriangle, destTriangle)
     return cv2.warpAffine(img, tranformMatrix, (750, 750))
 
@@ -44,16 +41,15 @@ def ShowPlot(img, alpha_angles, phi_angles):
             title = 'alpha:{0:1.0f} degrees; phi:{1:1.0f} degrees'.format(alpha/pi*180, phi/pi*180)
             plt.subplot(n_rows, n_cols, plot_number), plt.imshow(Perspective(img, alpha, phi)),plt.title(title)
             plot_number += 1
-    
     plt.show()
 
-def SavePlots(img, alpha_angles, phi_angles):
+def SavePlots(image, alpha_angles, phi_angles):
     for alpha in alpha_angles:
         for phi in phi_angles:
             file_name = 'alpha_{0:1.0f}_degrees_phi_{1:1.0f}_degrees.png'.format(alpha/pi*180, phi/pi*180)
-            cv2.imwrite(join(outputDir, file_name), Perspective(img, alpha, phi))
+            grayImage = cv2.cvtColor(Perspective(image, alpha, phi), cv2.COLOR_BGR2GRAY)
+            cv2.imwrite(join(outputDir, file_name), grayImage)
 
 alpha_angles = [pi/6, pi/4, pi/3]
 phi_angles = [-pi/3, -pi/4, -pi/6, -pi/12, 0, pi/12, pi/6, pi/4, pi/3]
-
 SavePlots(img, alpha_angles, phi_angles)
