@@ -7,6 +7,8 @@ bin
 obj
 /DataSet/*
 !/DataSet/Templates/*
+!/DataSet/Source/ModelTrain/*.py
+!/DataSet/Source/TestDatasetCreating/*.py
 /Libs/packages/*
 /Source/**/Debug/**/*
 /Source/**/Release/**/*
