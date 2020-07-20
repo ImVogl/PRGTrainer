@@ -35,12 +35,13 @@ def ShowPlot(img, alpha_angles, phi_angles):
     plot_number = 3
     n_rows = len(alpha_angles) + 1
     n_cols = len(phi_angles)
-    plt.subplot(n_rows, n_cols, 1),plt.imshow(img),plt.title('BaseImage')
+    plt.subplot(n_rows, n_cols, 1), plt.imshow(img), plt.title('BaseImage')
     for alpha in alpha_angles:
         for phi in phi_angles:
             title = 'alpha:{0:1.0f} degrees; phi:{1:1.0f} degrees'.format(alpha/pi*180, phi/pi*180)
-            plt.subplot(n_rows, n_cols, plot_number), plt.imshow(Perspective(img, alpha, phi)),plt.title(title)
+            plt.subplot(n_rows, n_cols, plot_number), plt.imshow(Perspective(img, alpha, phi)), plt.title(title)
             plot_number += 1
+
     plt.show()
 
 def SavePlots(image, alpha_angles, phi_angles):
