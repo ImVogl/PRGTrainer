@@ -25,7 +25,7 @@ def ChangeForeshortening(img, alpha, phi):
 # img - исходное изображение.
 # k - словарь с коэффициента изменения размеров для каждого из измерений. 
 def ChangeImageSize(img, k):
-    height, width, channels = img.shape
+    height, width = img.shape
     new_height = int(height*k['y'])
     new_width = int(width*k['x'])
     source = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
