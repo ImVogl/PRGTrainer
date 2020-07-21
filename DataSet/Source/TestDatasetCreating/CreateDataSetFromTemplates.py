@@ -2,11 +2,12 @@ import argparse
 from os import listdir
 from os.path import join, isfile
 import cv2
-from cv2 import COLOR_RGBA2GRAY, cvtColor, imread
+from cv2 import COLOR_RGB2GRAY, cvtColor, imread
 from numpy import ones, full_like, uint8, array
 from ImagesUtils import ChangeImageSize, ChangeForeshortening
 from random import randint
 from Utils import ClearFolder
+from math import pi
 
 # Установка параметров
 # parser - парсер входных аргументов.
@@ -67,8 +68,8 @@ def DebugSetUp():
 # template_size - размер шаблона в мм.
 def NormalizeTemplate(background, template, template_size):
     sample_ratio = {'x':template_size['x']/210, 'y':template_size['y']/297}
-    width_back, height_back, channels_back = background.shape
-    width_template, height_template, channels_template = template.shape
+    height_back, width_back = background.shape
+    height_template, width_template = template.shape
     real_ratio = {'x':width_template/width_back, 'y':height_template/height_back}
     resize_ratio = {'x': sample_ratio['x']/real_ratio['x'], 'y': sample_ratio['y']/real_ratio['y']}
 
@@ -134,8 +135,8 @@ def GetPositions(backgroung, template, resultes_per_path):
 # pathToTemplate - путь до файла шаблона.
 # template_size - размер шаблона в мм.
 def GetImages(pathToBackground, pathToTemplate, template_size):
-    backgroung = cvtColor(imread(pathToBackground), COLOR_RGBA2GRAY)
-    template = cvtColor(imread(pathToTemplate), COLOR_RGBA2GRAY)
+    backgroung = cvtColor(imread(pathToBackground), COLOR_RGB2GRAY)
+    template = cvtColor(imread(pathToTemplate), COLOR_RGB2GRAY)
     normalized_template = NormalizeTemplate(backgroung, template, template_size)
     return backgroung, normalized_template
 
@@ -229,3 +230,4 @@ parser.add_argument('--template_height', help='Height of template in mm.')
 
 # alpha_angles, phi_angles, backgroundFiles, templatesFiles = SetUp(parser)
 
+Main()

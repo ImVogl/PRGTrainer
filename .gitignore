@@ -17,3 +17,4 @@ obj
 /Source/ElementsRecognation/data/*
 Info.txt
 /Source/ElementsRecognation/.vs
+__pycache__
