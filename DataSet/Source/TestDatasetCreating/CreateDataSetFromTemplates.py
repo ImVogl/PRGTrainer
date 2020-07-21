@@ -5,6 +5,8 @@ import cv2
 from cv2 import COLOR_RGBA2GRAY, cvtColor, imread
 from numpy import ones, full_like, uint8, array
 from ImagesUtils import ChangeImageSize, ChangeForeshortening
+from random import randint
+from Utils import ClearFolder
 
 # Установка параметров
 # parser - парсер входных аргументов.
@@ -28,10 +30,49 @@ def SetUp(parser):
         if isfile(full_path):
             templatesFiles.append(full_path)
 
-    alpha_angles = [pi/6, pi/4, pi/3]
+    alpha_angles = [pi/4, pi/3, pi/2]
     phi_angles = [0, pi/12, pi/6, pi/4, pi/3]
 
-    return alpha_angles, phi_angles, backgroundFiles, templatesFiles
+    return alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height
+
+# Задание параметров для отладки.
+def DebugSetUp():
+    backgroundDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\BackgroundsForDataSet'
+    templatesDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Templates\\Seal\\DetectionTemplate'
+    outputDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Output'
+    template_width = 41
+    template_height = 41
+
+    backgroundFiles = []
+    for file_name in listdir(backgroundDir):
+        full_path = join(backgroundDir, file_name)
+        if isfile(full_path):
+            backgroundFiles.append(full_path)
+
+    templatesFiles = []
+    for file_name in listdir(templatesDir):
+        full_path = join(templatesDir, file_name)
+        if isfile(full_path):
+            templatesFiles.append(full_path)
+
+    alpha_angles = [pi/4, pi/3, pi/2]
+    phi_angles = [0, pi/12, pi/6, pi/4, pi/3]
+
+    return alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height
+
+
+# Изменение размера шаблона в соответствии с маштабом заднего фона
+# background - Изображение заднего фона.
+# template - Изображение шаблона.
+# template_size - размер шаблона в мм.
+def NormalizeTemplate(background, template, template_size):
+    sample_ratio = {'x':template_size['x']/210, 'y':template_size['y']/297}
+    width_back, height_back, channels_back = background.shape
+    width_template, height_template, channels_template = template.shape
+    real_ratio = {'x':width_template/width_back, 'y':height_template/height_back}
+    resize_ratio = {'x': sample_ratio['x']/real_ratio['x'], 'y': sample_ratio['y']/real_ratio['y']}
+
+    return ChangeImageSize(template, resize_ratio)
 
 # Объединение заднего фона и изображения.
 # background - изображение с заднем фоном.
@@ -48,20 +89,13 @@ def UnionImages(background, template, pos):
 
     return image
 
-# Создание изображения для обучения.
-# pathToBackground - путь до папки с задним фоном.
-# pathToTemplate - путь до папки с шаблонами изображений, которые предстоит найти 
-# pos - положение шаблона на фоне.
-def CreateTrainImage(pathToBackground, pathToTemplate, pos):
-    backgroung = cvtColor(imread(pathToBackground), COLOR_RGBA2GRAY)
-    template = cvtColor(imread(pathToTemplate), COLOR_RGBA2GRAY)
-    return UnionImages(backgroung, template, pos)
-
 # Создание изображения с маской объекта.
 # image - конечное изображение.
 # size - размер шаблона.
 # pos - положение шаблона.
-def CreateMaskForImage(image, size, pos):
+def CreateMaskForImage(image, template, pos):
+    width, height, channels = template.shape
+    size = { 'x': width, 'y': height }
     x_location = range(pos['x'], pos['x'] + size['x'])
     y_location = range(pos['y'], pos['y'] + size['y'])
     background = array([0, 100, 0], dtype=uint8)
@@ -77,18 +111,114 @@ def CreateMaskForImage(image, size, pos):
 
     return img
 
-# Изменение размера шаблона в соответствии с маштабом заднего фона
-# background - Изображение заднего фона.
-# template - Изображение шаблона.
-# template_size - размер шаблона в мм.
-def NormalizeTemplate(background, template, template_size):
-    sample_ratio = {'x':41/210, 'y':41/297}
-    width_back, height_back, channels_back = background.shape
-    width_template, height_template, channels_template = template.shape
-    real_ratio = {'x':width_template/width_back, 'y':height_template/height_back}
-    resize_ratio = {'x': sample_ratio['x']/real_ratio['x'], 'y': sample_ratio['y']/real_ratio['y']}
+# Получение коллекции положений шаблона на фоне.
+# backgroung - задний фон.
+# template - шаблон.
+# resultes_per_path - число результирующих файлов на одну пару шаблон-бэкграунд.
+def GetPositions(backgroung, template, resultes_per_path):
+    back_w, back_h, channels = backgroung.shape
+    template_w, template_h, channels = backgroung.shape
+    x_min = 10
+    x_max = back_w - 10 - template_w
+    y_min = 10
+    y_max = back_h - 10 - template_h
 
-    return ChangeImageSize(template, resize_ratio)
+    positions = []
+    for num in range(resultes_per_path):
+        positions.append({'x': randint(x_min, x_max), 'y': randint(y_min, y_max)})
+    
+    return positions
+
+# Получает экземпляр изображений
+# pathToBackground - путь до файла бэкграунда.
+# pathToTemplate - путь до файла шаблона.
+# template_size - размер шаблона в мм.
+def GetImages(pathToBackground, pathToTemplate, template_size):
+    backgroung = cvtColor(imread(pathToBackground), COLOR_RGBA2GRAY)
+    template = cvtColor(imread(pathToTemplate), COLOR_RGBA2GRAY)
+    normalized_template = NormalizeTemplate(backgroung, template, template_size)
+    return backgroung, normalized_template
+
+# Создание коллекции изображений на основе одной пары фон-шаблон.
+# backgroung - фоновое изображение.
+# template - изабражение шаблона.
+# pair_num - номер пары фон-шаблон.
+def CreateImagesBunch(backgroung, template, alpha_angles, phi_angles, pair_num):
+    resultes_per_path = 15  # Количество результирующих файлов на одну пару шаблон-бэкграунд.
+    images_bunch = {}
+    masks_bunch = {}
+    keys = []
+    sub_num = 1
+
+    for pos in GetPositions(backgroung, template, resultes_per_path):
+        base_image = UnionImages(backgroung, template, pos)
+        base_mask = CreateMaskForImage(backgroung, template, pos)
+        
+        for alpha in alpha_angles:
+            for phi in phi_angles:
+                name = str(pair_num) + '_' + str(sub_num)
+                images_bunch[name] = ChangeForeshortening(base_image, alpha, phi)
+                masks_bunch[name] = ChangeForeshortening(base_mask, alpha, phi)
+                keys.append(name)
+                sub_num += 1
+    
+    return images_bunch, masks_bunch, keys
+
+# Выдает значение, которое определяет, нужно ли сохранять изображение.
+# save_proportion - доля изображений, которая будет случайным образом отобрана и сохранена.
+def MustSave(save_proportion):
+    percent = int(100 * save_proportion)
+    return percent > randint(0, 100)
+
+
+# Сохранение сгенерированных файлов и масок.
+# outputDir - путь до выходной директории.
+# images - словарь изображений.
+# masks - словарь масок с изображениями.
+# keys - коллекция ключей к словарю.
+# save_proportion - доля изображений, которая будет случайным образом отобрана и сохранена.
+def SaveData(outputDir, images, masks, keys, save_proportion = 1.0 ):
+    if (save_proportion > 1.0):
+        save_proportion = 1.0
+
+    if (save_proportion < 0.0):
+        save_proportion = 0.0
+
+    imagesDir = join(outputDir, 'Images')
+    masksDir = join(outputDir, 'Masks')
+
+    ClearFolder(imagesDir)
+    ClearFolder(masksDir)
+    for key in keys:
+        if not MustSave(save_proportion):
+            continue
+
+        cv2.imwrite(join(imagesDir, key + '.png'), images[key])
+        cv2.imwrite(join(masksDir, key + '.png'), masks[key])
+
+
+# Основная функция.
+def Main():
+    alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height = DebugSetUp()
+    pair_num = 1
+
+    images = {}
+    masks = {}
+    keys = []
+    template_size = { 'x':template_width, 'y':template_height }
+    for backgroundPath in backgroundFiles:
+        for templatePath in templatesFiles:
+            background, template = GetImages(backgroundPath, templatePath, template_size)
+            images_bunch, masks_bunch, subkeys = CreateImagesBunch(background, template, alpha_angles, phi_angles, pair_num)
+            
+            keys += subkeys
+            images.update(images_bunch)
+            masks.update(masks_bunch)
+
+            pair_num += 1
+
+    SaveData(outputDir, images, masks, keys)
+            
 
 parser = argparse.ArgumentParser(description='Templates path folder and backgrounds path folder.')
 parser.add_argument('--templates', help='Path to folder with templates of targer image.')
@@ -97,4 +227,5 @@ parser.add_argument('--out', help='Path to output dir.')
 parser.add_argument('--template_width', help='Width of template in mm.')
 parser.add_argument('--template_height', help='Height of template in mm.')
 
-alpha_angles, phi_angles, backgroundFiles, templatesFiles = SetUp(parser)
+# alpha_angles, phi_angles, backgroundFiles, templatesFiles = SetUp(parser)
+

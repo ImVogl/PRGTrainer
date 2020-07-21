@@ -11,7 +11,11 @@ def ChangeForeshortening(img, alpha, phi):
     deltaX = height*sin(phi)
     deltaY = height*(1 - sin(alpha))
     source = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
-    dest = np.float32([[deltaX, 0], [width + deltaX, 0], [0, height - deltaY], [width, height - deltaY]])
+    if phi > 0:
+        dest = np.float32([[deltaX, 0], [width + deltaX, 0], [0, height - deltaY], [width, height - deltaY]])
+    else:
+        dest = np.float32([[0, 0], [width, 0], [deltaX, height - deltaY], [width + deltaX, height - deltaY]])
+
     tranformMatrix = cv2.getPerspectiveTransform(source, dest)
     transformedImage = cv2.warpPerspective(img, tranformMatrix, (int(width + deltaX), int(height - deltaY)))
     white_bg = 255*np.ones_like(transformedImage)
