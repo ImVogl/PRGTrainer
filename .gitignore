@@ -5,10 +5,7 @@ bin
 *.dll
 *.pdb
 obj
-/DataSet/*
-!/DataSet/Templates/*
-!/DataSet/Source/ModelTrain/*.py
-!/DataSet/Source/TestDatasetCreating/*.py
+/DataSet/**/*
 /Libs/packages/*
 /Source/**/Debug/**/*
 /Source/**/Release/**/*
@@ -18,3 +15,4 @@ obj
 Info.txt
 /Source/ElementsRecognation/.vs
 __pycache__
+.vscode
