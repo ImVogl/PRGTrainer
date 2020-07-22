@@ -3,6 +3,10 @@ import os, shutil
 # Очистка директории.
 # folder_path - путь до папки, которую необходимо очистить.
 def ClearFolder(folder_path):
+    if not os.path.isdir(folder_path):
+        os.mkdir(folder_path)
+        return
+
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:
