@@ -1,14 +1,14 @@
 import argparse
 from sys import argv
 from math import pi
-from os import listdir
+from os import listdir, getcwd
 from os.path import join, isfile
 
 # Задание параметров для отладки.
 def DebugSetUp():
-    backgroundDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\BackgroundsForDataSet'
-    templatesDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Templates\\Seal\\DetectionTemplate'
-    outputDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Output'
+    backgroundDir = join(getcwd(), '..\\..\\..\\DataSet\\BackgroundsForDataSet')
+    templatesDir = join(getcwd(), '..\\..\\..\\DataSet\\Templates\\Seal\\DetectionTemplate')
+    outputDir = join(getcwd(), '..\\..\\..\\DataSet\\Output')
     template_width = 41
     template_height = 41
 
