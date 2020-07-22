@@ -1,0 +1,1 @@
+python CreateDataSetFromTemplates.py --templates "I:\Visual Studio 2017\PRGTrainer\DataSet\Templates\Seal\DetectionTemplate" --background "I:\Visual Studio 2017\PRGTrainer\DataSet\BackgroundsForDataSet" --out "I:\Visual Studio 2017\PRGTrainer\DataSet\Output" --template_width 41 --template_height 41

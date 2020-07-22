@@ -1,66 +1,10 @@
-import argparse
-from os import listdir
-from os.path import join, isfile
 import cv2
 from cv2 import COLOR_RGB2GRAY, cvtColor, imread
 import numpy as np
-from ImagesUtils import ChangeImageSize, ChangeForeshortening, ImageShape
+from ImagesUtils import ChangeImageSize, ChangeForeshortening, ImageShape, SaveImages
 from random import randint
-from Utils import ClearFolder
-from math import pi
-
-# Установка параметров
-# parser - парсер входных аргументов.
-def SetUp(parser):
-    args = parser.parse_args()
-    backgroundDir = args.background
-    templatesDir = args.templates
-    outputDir = args.out
-    template_width = args.template_width
-    template_height = args.template_height
-
-    backgroundFiles = []
-    for file_name in listdir(backgroundDir):
-        full_path = join(backgroundDir, file_name)
-        if isfile(full_path):
-            backgroundFiles.append(full_path)
-
-    templatesFiles = []
-    for file_name in listdir(templatesDir):
-        full_path = join(templatesDir, file_name)
-        if isfile(full_path):
-            templatesFiles.append(full_path)
-
-    alpha_angles = [pi/4, pi/3, pi/2]
-    phi_angles = [0, pi/12, pi/6, pi/4, pi/3]
-
-    return alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height
-
-# Задание параметров для отладки.
-def DebugSetUp():
-    backgroundDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\BackgroundsForDataSet'
-    templatesDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Templates\\Seal\\DetectionTemplate'
-    outputDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Output'
-    template_width = 41
-    template_height = 41
-
-    backgroundFiles = []
-    for file_name in listdir(backgroundDir):
-        full_path = join(backgroundDir, file_name)
-        if isfile(full_path):
-            backgroundFiles.append(full_path)
-
-    templatesFiles = []
-    for file_name in listdir(templatesDir):
-        full_path = join(templatesDir, file_name)
-        if isfile(full_path):
-            templatesFiles.append(full_path)
-
-    alpha_angles = [pi/4, pi/3, pi/2]
-    phi_angles = [0, pi/12, pi/6, pi/4, pi/3]
-
-    return alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height
-
+from progress.bar import Bar
+from SetUp import SetUp
 
 # Изменение размера шаблона в соответствии с маштабом заднего фона
 # background - Изображение заднего фона.
@@ -80,13 +24,13 @@ def NormalizeTemplate(background, template, template_size):
 # template - изображение шаблона.
 # pos - положение шаблона на изображении.
 def UnionImages(background, template, pos):
-    boundary = 225
+    boundary = 240
     height, width = ImageShape(template)
     image = np.copy(background)
     for x in range(width):
         for y in range(height):
             if template[y][x] < boundary and background[y + pos['y']][x + pos['x']] < template[y][x]:
-                image[y][x] = template[y][x]
+                image[y + pos['y']][x + pos['x']] = template[y][x]
 
     return image
 
@@ -145,7 +89,7 @@ def GetImages(pathToBackground, pathToTemplate, template_size):
 # template - изабражение шаблона.
 # pair_num - номер пары фон-шаблон.
 def CreateImagesBunch(backgroung, template, alpha_angles, phi_angles, pair_num):
-    resultes_per_path = 15  # Количество результирующих файлов на одну пару шаблон-бэкграунд.
+    resultes_per_path = 12  # Количество результирующих файлов на одну пару шаблон-бэкграунд.
     images_bunch = {}
     masks_bunch = {}
     keys = []
@@ -165,69 +109,23 @@ def CreateImagesBunch(backgroung, template, alpha_angles, phi_angles, pair_num):
     
     return images_bunch, masks_bunch, keys
 
-# Выдает значение, которое определяет, нужно ли сохранять изображение.
-# save_proportion - доля изображений, которая будет случайным образом отобрана и сохранена.
-def MustSave(save_proportion):
-    percent = int(100 * save_proportion)
-    return percent > randint(0, 100)
-
-
-# Сохранение сгенерированных файлов и масок.
-# outputDir - путь до выходной директории.
-# images - словарь изображений.
-# masks - словарь масок с изображениями.
-# keys - коллекция ключей к словарю.
-# save_proportion - доля изображений, которая будет случайным образом отобрана и сохранена.
-def SaveData(outputDir, images, masks, keys, save_proportion = 1.0 ):
-    if (save_proportion > 1.0):
-        save_proportion = 1.0
-
-    if (save_proportion < 0.0):
-        save_proportion = 0.0
-
-    imagesDir = join(outputDir, 'Images')
-    masksDir = join(outputDir, 'Masks')
-
-    ClearFolder(imagesDir)
-    ClearFolder(masksDir)
-    for key in keys:
-        if not MustSave(save_proportion):
-            continue
-
-        cv2.imwrite(join(imagesDir, key + '.png'), images[key])
-        cv2.imwrite(join(masksDir, key + '.png'), masks[key])
-
-
 # Основная функция.
 def Main():
-    alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height = DebugSetUp()
-    pair_num = 1
+    alpha_angles, phi_angles, backgroundFiles, templatesFiles, outputDir, template_width, template_height = SetUp()
+    print()
 
-    images = {}
-    masks = {}
-    keys = []
+    pair_num = 1
     template_size = { 'x':template_width, 'y':template_height }
+    progressBar = Bar('Creating dataset', max = len(backgroundFiles) * len(templatesFiles))
+    progressBar.start()
     for backgroundPath in backgroundFiles:
         for templatePath in templatesFiles:
             background, template = GetImages(backgroundPath, templatePath, template_size)
             images_bunch, masks_bunch, subkeys = CreateImagesBunch(background, template, alpha_angles, phi_angles, pair_num)
-            
-            keys += subkeys
-            images.update(images_bunch)
-            masks.update(masks_bunch)
-
+            SaveImages(outputDir, images_bunch, masks_bunch, subkeys)
+            progressBar.next()
             pair_num += 1
-
-    SaveData(outputDir, images, masks, keys)
-            
-
-parser = argparse.ArgumentParser(description='Templates path folder and backgrounds path folder.')
-parser.add_argument('--templates', help='Path to folder with templates of targer image.')
-parser.add_argument('--background', help='Path to folder with background for image.')
-parser.add_argument('--out', help='Path to output dir.')
-parser.add_argument('--template_width', help='Width of template in mm.')
-parser.add_argument('--template_height', help='Height of template in mm.')
-
-# alpha_angles, phi_angles, backgroundFiles, templatesFiles = SetUp(parser)
+    
+    progressBar.finish()
 
 Main()

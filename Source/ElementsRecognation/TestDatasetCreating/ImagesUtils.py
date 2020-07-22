@@ -1,6 +1,9 @@
 import numpy as np
 import cv2
 from math import sin, cos, pi
+from random import randint
+from Utils import ClearFolder
+from os.path import join
 
 # Получает размер размера изображения.
 # image - изображение.
@@ -42,3 +45,34 @@ def ChangeImageSize(img, k):
     tranformMatrix = cv2.getPerspectiveTransform(source, dest)
     transformedImage = cv2.warpPerspective(img, tranformMatrix, (new_width, new_height))
     return transformedImage
+
+# Выдает значение, которое определяет, нужно ли сохранять изображение.
+# save_proportion - доля изображений, которая будет случайным образом отобрана и сохранена.
+def MustSave(save_proportion):
+    percent = int(100 * save_proportion)
+    return percent > randint(0, 100)
+
+# Сохранение сгенерированных файлов и масок.
+# outputDir - путь до выходной директории.
+# images - словарь изображений.
+# masks - словарь масок с изображениями.
+# keys - коллекция ключей к словарю.
+# save_proportion - доля изображений, которая будет случайным образом отобрана и сохранена.
+def SaveImages(outputDir, images, masks, keys, save_proportion = 1.0):
+    if (save_proportion > 1.0):
+        save_proportion = 1.0
+
+    if (save_proportion < 0.0):
+        save_proportion = 0.0
+
+    imagesDir = join(outputDir, 'Images')
+    masksDir = join(outputDir, 'Masks')
+
+    ClearFolder(imagesDir)
+    ClearFolder(masksDir)
+    for key in keys:
+        if not MustSave(save_proportion):
+            continue
+
+        cv2.imwrite(join(imagesDir, key + '.png'), images[key])
+        cv2.imwrite(join(masksDir, key + '.png'), masks[key])
