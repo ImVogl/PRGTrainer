@@ -5,9 +5,12 @@ from math import sin, cos, pi
 from os.path import join
 from os import getcwd
 from sys import argv
+from ImagesUtils import ChangeImageSize, ChangeForeshortening
 
-path = join(getcwd(), argv[0], 'DetectionTemplate.png')
-outputDir = join(getcwd(), argv[0], 'Detection')
+# path = join(getcwd(), argv[0], 'DetectionTemplate.png')
+path = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Templates\\Seal\\DetectionTemplate\\DetectionTemplate.png'
+# outputDir = join(getcwd(), argv[0], 'Detection')
+outputDir = 'I:\\Visual Studio 2017\\PRGTrainer\\DataSet\\Templates\\Seal\\Detection2'
 
 img = cv2.imread(path)
 def Affine(img):
@@ -39,18 +42,34 @@ def ShowPlot(img, alpha_angles, phi_angles):
     for alpha in alpha_angles:
         for phi in phi_angles:
             title = 'alpha:{0:1.0f} degrees; phi:{1:1.0f} degrees'.format(alpha/pi*180, phi/pi*180)
-            plt.subplot(n_rows, n_cols, plot_number), plt.imshow(Perspective(img, alpha, phi)), plt.title(title)
+            plt.subplot(n_rows, n_cols, plot_number), plt.imshow(ChangeForeshortening(img, alpha, phi)), plt.title(title)
             plot_number += 1
 
+    plt.show()
+
+def ShowPlotResizing(img, coefficient):
+    plot_number = 3
+    n_rows = len(alpha_angles) + 1
+    n_cols = len(phi_angles)
+    plt.subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.title('BaseImage')
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(ChangeImageSize(img, {'x': coefficient, 'y': coefficient})),
+    plt.title('Resized Image')
     plt.show()
 
 def SavePlots(image, alpha_angles, phi_angles):
     for alpha in alpha_angles:
         for phi in phi_angles:
             file_name = 'alpha_{0:1.0f}_degrees_phi_{1:1.0f}_degrees.png'.format(alpha/pi*180, phi/pi*180)
-            grayImage = cv2.cvtColor(Perspective(image, alpha, phi), cv2.COLOR_BGR2GRAY)
+            grayImage = cv2.cvtColor(ChangeForeshortening(image, alpha, phi), cv2.COLOR_BGR2GRAY)
             cv2.imwrite(join(outputDir, file_name), grayImage)
 
-alpha_angles = [pi/6, pi/4, pi/3]
-phi_angles = [-pi/3, -pi/4, -pi/6, -pi/12, 0, pi/12, pi/6, pi/4, pi/3]
-SavePlots(img, alpha_angles, phi_angles)
+# alpha_angles = [pi/6, pi/4, pi/3]
+# phi_angles = [-pi/3, -pi/4, -pi/6, -pi/12, 0, pi/12, pi/6, pi/4, pi/3]
+alpha_angles = [pi/4, pi/3]
+phi_angles = [-pi/6, -pi/12, 0, pi/12, pi/6]
+ShowPlot(img, alpha_angles, phi_angles)
+ShowPlotResizing(img, 1.2)

@@ -3,8 +3,8 @@ from os import listdir
 from os.path import join, isfile
 import cv2
 from cv2 import COLOR_RGB2GRAY, cvtColor, imread
-from numpy import ones, full_like, uint8, array
-from ImagesUtils import ChangeImageSize, ChangeForeshortening
+import numpy as np
+from ImagesUtils import ChangeImageSize, ChangeForeshortening, ImageShape
 from random import randint
 from Utils import ClearFolder
 from math import pi
@@ -68,8 +68,8 @@ def DebugSetUp():
 # template_size - размер шаблона в мм.
 def NormalizeTemplate(background, template, template_size):
     sample_ratio = {'x':template_size['x']/210, 'y':template_size['y']/297}
-    height_back, width_back = background.shape
-    height_template, width_template = template.shape
+    height_back, width_back = ImageShape(background)
+    height_template, width_template = ImageShape(template)
     real_ratio = {'x':width_template/width_back, 'y':height_template/height_back}
     resize_ratio = {'x': sample_ratio['x']/real_ratio['x'], 'y': sample_ratio['y']/real_ratio['y']}
 
@@ -81,12 +81,12 @@ def NormalizeTemplate(background, template, template_size):
 # pos - положение шаблона на изображении.
 def UnionImages(background, template, pos):
     boundary = 225
-    width, height, channels = template.shape
-    image = full_like(background)
+    height, width = ImageShape(template)
+    image = np.copy(background)
     for x in range(width):
         for y in range(height):
-            if template[x][y][0] < boundary and background[x + pos['x']][y + pos['y']][0] < template[x][y][0]:
-                image[x][y] = template[x][y]
+            if template[y][x] < boundary and background[y + pos['y']][x + pos['x']] < template[y][x]:
+                image[y][x] = template[y][x]
 
     return image
 
@@ -95,20 +95,20 @@ def UnionImages(background, template, pos):
 # size - размер шаблона.
 # pos - положение шаблона.
 def CreateMaskForImage(image, template, pos):
-    width, height, channels = template.shape
+    height, width = ImageShape(template)
     size = { 'x': width, 'y': height }
     x_location = range(pos['x'], pos['x'] + size['x'])
     y_location = range(pos['y'], pos['y'] + size['y'])
-    background = array([0, 100, 0], dtype=uint8)
-    object_pos = array([100, 0, 0], dtype=uint8)
-    width, height, channels = image.shape
-    img = ones(width, height, 3, dtype=uint8)
+    background = np.array([0, 100, 0], dtype=np.uint8)
+    object_pos = np.array([100, 0, 0], dtype=np.uint8)
+    height, width = ImageShape(image)
+    img = np.ones((height, width, 3), dtype=np.uint8)
     for x in range(width):
         for y in range(height):
             if x in x_location and y in y_location:
-                img[x][y] = object_pos
+                img[y][x] = object_pos
             else:
-                img[x][y] = background
+                img[y][x] = background
 
     return img
 
@@ -117,8 +117,8 @@ def CreateMaskForImage(image, template, pos):
 # template - шаблон.
 # resultes_per_path - число результирующих файлов на одну пару шаблон-бэкграунд.
 def GetPositions(backgroung, template, resultes_per_path):
-    back_w, back_h, channels = backgroung.shape
-    template_w, template_h, channels = backgroung.shape
+    back_h, back_w = ImageShape(backgroung)
+    template_h, template_w = ImageShape(template)
     x_min = 10
     x_max = back_w - 10 - template_w
     y_min = 10
