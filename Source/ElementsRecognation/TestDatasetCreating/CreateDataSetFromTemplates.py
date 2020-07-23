@@ -24,12 +24,12 @@ def NormalizeTemplate(background, template, template_size):
 # template - изображение шаблона.
 # pos - положение шаблона на изображении.
 def UnionImages(background, template, pos):
-    boundary = 240
+    boundary = 252
     height, width = ImageShape(template)
     image = np.copy(background)
     for x in range(width):
         for y in range(height):
-            if template[y][x] < boundary and background[y + pos['y']][x + pos['x']] < template[y][x]:
+            if template[y][x] < boundary and background[y + pos['y']][x + pos['x']] > template[y][x]:
                 image[y + pos['y']][x + pos['x']] = template[y][x]
 
     return image
